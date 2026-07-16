@@ -6,8 +6,12 @@ import SidebarLogin from "../../sidebarLogin";
 import ProjektList from "./ProjektList";
 import NewProjectForm from "./NewProjectForm";
 import DeleteDialog from "./DeleteDialog";
+import deDE from "../../../i18n/locales/de-DE";
+import { getLocaleMessages, useLocale } from "../../../i18n";
 
 export default function ProjektePage() {
+  const { locale } = useLocale();
+  const copy = getLocaleMessages(locale).projectsPage ?? deDE.projectsPage;
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [projekte, setProjekte] = useState<any[]>([]);
@@ -137,7 +141,7 @@ export default function ProjektePage() {
           boxShadow: '0 2px 16px #0002',
         }}
       >
-        <h2 style={{ color: 'var(--foreground)', marginBottom: 24, textAlign: 'center' }}>Bitte einloggen oder registrieren</h2>
+        <h2 style={{ color: 'var(--foreground)', marginBottom: 24, textAlign: 'center' }}>{copy.loginPrompt}</h2>
         <SidebarLogin />
       </div>
     );
@@ -146,9 +150,9 @@ export default function ProjektePage() {
   // Listenansicht für alle Projekte
   return (
     <div style={{ maxWidth: 700, margin: '0 auto', padding: '2rem' }}>
-      <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '1rem' }}>Projekte</h1>
+      <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '1rem' }}>{copy.title}</h1>
       <p style={{ fontSize: '1.1rem', marginBottom: '2rem' }}>
-        Hier werden alle deine Projekte angezeigt. Klicke auf ein Projekt, um es zu öffnen.
+        {copy.subtitle}
       </p>
       
       <div style={{ marginBottom: 24 }}>
@@ -169,7 +173,7 @@ export default function ProjektePage() {
             onClick={() => setShowNewProject(true)}
             className="new-project-btn" style={{ padding: '10px 22px', borderRadius: 8, background: 'var(--button)', color: 'var(--text-primary)', border: 'none', fontWeight: 700, fontSize: 16, cursor: 'pointer', transition: 'all 0.2s ease' }}
           >
-            + Neues Projekt anlegen
+              {copy.newProjectButton}
           </button>
         )}
       </div>
@@ -188,12 +192,12 @@ export default function ProjektePage() {
 
           <DeleteDialog
             isOpen={showDeleteDialog.open}
-            title="Projekt löschen"
-            message="Möchtest du dieses Projekt wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
+            title={copy.deleteTitle}
+            message={copy.deleteMessage}
             onConfirm={() => handleDelete(showDeleteDialog.id!)}
             onCancel={() => setShowDeleteDialog({id: null, open: false})}
-            confirmText="Löschen"
-            cancelText="Abbrechen"
+            confirmText={copy.deleteConfirm}
+            cancelText={copy.deleteCancel}
             loading={loading}
           />
         </>
