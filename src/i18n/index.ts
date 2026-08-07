@@ -1,9 +1,8 @@
 import deDE from "./locales/de-DE";
 import enGB from "./locales/en-GB";
-import enUS from "./locales/en-US";
 import { useCallback, useEffect, useState } from "react";
 
-export type LocaleCode = "de-DE" | "en-GB" | "en-US";
+export type LocaleCode = "de-DE" | "en-GB";
 
 export type LandingPageCopy = {
 	eyebrow: string;
@@ -530,13 +529,11 @@ export const localeChangeEventName = "ethno-log-locale-change";
 export const locales: Record<LocaleCode, LocaleMessages> = {
 	"de-DE": deDE,
 	"en-GB": enGB,
-	"en-US": enUS,
 };
 
 export const localeLabels: Record<LocaleCode, string> = {
 	"de-DE": "Deutsch",
 	"en-GB": "English (UK)",
-	"en-US": "English (US)",
 };
 
 export function getLocaleFromValue(value?: string | null): LocaleCode {
