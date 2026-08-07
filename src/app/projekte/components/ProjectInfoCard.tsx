@@ -1,6 +1,10 @@
 "use client";
 import React, { useState } from 'react';
+import { getLocaleMessages, useLocale } from "../../../i18n";
+import TagFilter from "./TagFilter";
+import deDE from '../../../i18n/locales/de-DE';
 
+ 
 interface ProjectInfoCardProps {
   projekt: any;
   canEdit?: boolean;
@@ -19,6 +23,8 @@ export default function ProjectInfoCard({ projekt, canEdit = false, onNameUpdate
   const [editNames, setEditNames] = useState<{ [key: string]: string }>({});
   const [editDescs, setEditDescs] = useState<{ [key: string]: string }>({});
   const [localLoading, setLocalLoading] = useState(false);
+  const { locale } = useLocale();
+  const copy = getLocaleMessages(locale).projectInfoCard  ?? deDE.projectInfoCard;
 
   // Handler für das Speichern des Namens
   const handleNameSave = async (projektId: string) => {
@@ -26,7 +32,7 @@ export default function ProjectInfoCard({ projekt, canEdit = false, onNameUpdate
     
     const newName = editNames[projektId] || '';
     if (!newName.trim()) {
-      alert('Bitte geben Sie einen Namen ein.');
+      alert(copy.enterNameUserAlert);
       return;
     }
     
@@ -35,7 +41,7 @@ export default function ProjectInfoCard({ projekt, canEdit = false, onNameUpdate
       await onNameUpdate(projektId, newName);
       setEditStates({ ...editStates, [projektId]: false });
     } catch (error) {
-      console.error('Fehler beim Speichern des Namens:', error);
+      console.error(copy.nameSaveConsoleError, error);
     } finally {
       setLocalLoading(false);
     }
@@ -52,7 +58,7 @@ export default function ProjectInfoCard({ projekt, canEdit = false, onNameUpdate
       await onDescUpdate(projektId, newDesc);
       setOpenDesc({ ...openDesc, [projektId]: false });
     } catch (error) {
-      console.error('Fehler beim Speichern der Beschreibung:', error);
+      console.error(copy.descriptionSaveConsoleError, error);
     } finally {
       setLocalLoading(false);
     }
@@ -112,7 +118,7 @@ export default function ProjectInfoCard({ projekt, canEdit = false, onNameUpdate
                   }}
                   disabled={loading || localLoading}
                 >
-                  Speichern
+                  {copy.saveLabel}
                 </button>
                 <button 
                   onClick={() => setEditStates({ ...editStates, [projekt.id]: false })} 
@@ -128,7 +134,7 @@ export default function ProjectInfoCard({ projekt, canEdit = false, onNameUpdate
                   }}
                   disabled={loading || localLoading}
                 >
-                  Abbrechen
+                  {copy.cancelLabel}
                 </button>
               </div>
             ) 
@@ -152,7 +158,7 @@ export default function ProjectInfoCard({ projekt, canEdit = false, onNameUpdate
                       width: 36,
                       height: 36
                     }}
-                    title="Bearbeiten"
+                    title={copy.editLabel}
                   >
                     ✏️
                   </button>
@@ -174,7 +180,7 @@ export default function ProjectInfoCard({ projekt, canEdit = false, onNameUpdate
                         height: 36
                       }}
                       disabled={loading || localLoading}
-                      title="Löschen"
+                      title={copy.deleteLabel}
                     >
                       🗑️
                     </button>
@@ -214,7 +220,7 @@ export default function ProjectInfoCard({ projekt, canEdit = false, onNameUpdate
           canEdit ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <textarea
-                placeholder="Beschreibung..."
+                placeholder={copy.descriptionPlaceholder}
                 value={editDescs[projekt.id] ?? projekt.beschreibung ?? ""}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEditDescs({ ...editDescs, [projekt.id]: e.target.value })}
                 style={{ 
@@ -300,9 +306,9 @@ export default function ProjectInfoCard({ projekt, canEdit = false, onNameUpdate
       </div>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 16, fontSize: 12, color: 'var(--text-muted)', fontWeight: 400 }}>
-        <span>Erstellt: {projekt.created_at ? new Date(projekt.created_at).toLocaleDateString() : "-"}</span>
-        {projekt.updated_at && <span>Letzte Änderung: {new Date(projekt.updated_at).toLocaleDateString()}</span>}
-        {projekt.arbeitsweise && <span>Arbeitsweise: {projekt.arbeitsweise === 'vor_ort' ? 'Vor Ort' : projekt.arbeitsweise === 'hybrid' ? 'Hybrid' : 'Nur remote'}</span>}
+        <span>{copy.createdAtLabel} {projekt.created_at ? new Date(projekt.created_at).toLocaleDateString() : "-"}</span>
+        {projekt.updated_at && <span>{copy.lastChange}{new Date(projekt.updated_at).toLocaleDateString()}</span>}
+        {projekt.arbeitsweise && <span>{copy.workingMethod} {projekt.arbeitsweise === 'vor_ort' ? copy.onLocation : projekt.arbeitsweise === 'hybrid' ? copy.hybrid : copy.remote}</span>}
       </div>
     </div>
   );

@@ -1,6 +1,10 @@
 "use client";
 import React, { useState } from 'react';
 
+import { getLocaleMessages, useLocale } from '../../../i18n';
+import deDE from '../../../i18n/locales/de-DE';
+
+
 interface NewProjectFormProps {
   user: any;
   isLightMode: boolean;
@@ -18,6 +22,9 @@ export default function NewProjectForm({
   createError,
   creatingProject
 }: NewProjectFormProps) {
+  const { locale } = useLocale();
+  const copy = getLocaleMessages(locale).newProjectForm  ?? deDE.newProjectForm;
+
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectMode, setNewProjectMode] = useState("");
   const [editDescs, setEditDescs] = useState<{[id:string]: string}>({ new: '' });
@@ -44,7 +51,7 @@ export default function NewProjectForm({
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', width: '100%' }}>
         <input
           type="text"
-          placeholder="Projektname"
+          placeholder={copy.projectNamePlaceholder}
           value={newProjectName}
           onChange={(e) => setNewProjectName(e.target.value)}
           style={{ 
@@ -73,7 +80,7 @@ export default function NewProjectForm({
             fontSize: 16
           }}
         >
-          Anlegen
+          {copy.createLabel}
         </button>
         <button
           onClick={onCancel}
@@ -88,17 +95,17 @@ export default function NewProjectForm({
             fontSize: 16
           }}
         >
-          Abbrechen
+          {copy.cancelLabel}
         </button>
       </div>
 
       {/* Beschreibung - immer sichtbar */}
       <div style={{ width: '100%' }}>
         <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 16 }}>
-          Projektbeschreibung:
+          {copy.projectDescriptionLabel}
         </label>
         <textarea
-          placeholder="Beschreibe dein Projekt..."
+          placeholder={copy.projectDescriptionPlaceholder}
           value={editDescs['new'] ?? ""}
           onChange={(e) => setEditDescs(descs => ({ ...descs, ['new']: e.target.value }))}
           style={{ 
@@ -119,7 +126,7 @@ export default function NewProjectForm({
       {/* Arbeitsweise */}
       <div style={{ width: '100%' }}>
         <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 16 }}>
-          Arbeitsweise:
+          {copy.workingMethodLabel}
         </label>
         <select
           value={newProjectMode}
@@ -136,10 +143,10 @@ export default function NewProjectForm({
             color: 'var(--text-primary)'
           }}
         >
-          <option value="" disabled={!!newProjectMode} style={{ background: 'var(--background)', color: 'var(--text-primary)' }}>Bitte wählen ...</option>
-          <option value="vor_ort" style={{ background: 'var(--background)', color: 'var(--text-primary)' }}>🏢 Vor Ort</option>
-          <option value="hybrid" style={{ background: 'var(--background)', color: 'var(--text-primary)' }}>🔀 Hybrid</option>
-          <option value="remote" style={{ background: 'var(--background)', color: 'var(--text-primary)' }}>🏠 Nur remote</option>
+          <option value="" disabled={!!newProjectMode} style={{ background: 'var(--background)', color: 'var(--text-primary)' }}>{copy.pleaseChooseLabel}</option>
+          <option value="vor_ort" style={{ background: 'var(--background)', color: 'var(--text-primary)' }}>{copy.onLocationOption}</option>
+          <option value="hybrid" style={{ background: 'var(--background)', color: 'var(--text-primary)' }}>{copy.hybridOption}</option>
+          <option value="remote" style={{ background: 'var(--background)', color: 'var(--text-primary)' }}>{copy.remoteOption}</option>
         </select>
       </div>
 

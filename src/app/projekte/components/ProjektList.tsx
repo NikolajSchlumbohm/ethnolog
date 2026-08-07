@@ -1,5 +1,7 @@
 import React from 'react';
 import ProjektCard from './ProjektCard';
+import { getLocaleMessages, useLocale } from '../../../i18n';
+import deDE from '../../../i18n/locales/de-DE';
 
 interface ProjektListProps {
   projekte: any[];
@@ -20,8 +22,11 @@ export default function ProjektList({
   onSelectProjekt,
   onDeleteProjekt
 }: ProjektListProps) {
+  const { locale } = useLocale();
+  const copy = getLocaleMessages(locale).projectsList ?? deDE.projectsList;
+
   if (loading) {
-    return <div>Lade Projekte...</div>;
+    return <div>{copy.loadingProjectsLabel}</div>;
   }
 
   if (error) {
@@ -29,7 +34,7 @@ export default function ProjektList({
   }
 
   if (projekte.length === 0) {
-    return <div style={{ color: '#888' }}>[Keine Projekte gefunden]</div>;
+    return <div style={{ color: '#888' }}>[{copy.noProjectsLabel}]</div>;
   }
 
   return (

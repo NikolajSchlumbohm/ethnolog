@@ -1,5 +1,7 @@
 "use client";
 import React from 'react';
+import { useLocale, getLocaleMessages } from '../../../i18n';
+import deDE from '../../../i18n/locales/de-DE';
 
 // Dark Mode CSS Variables
 const isDarkMode = typeof window !== 'undefined' && 
@@ -24,6 +26,8 @@ export default function TabNavigation({
   onCalendarToggle,
   onDeleteOption
 }: TabNavigationProps) {
+  const { locale } = useLocale();
+  const copy = getLocaleMessages(locale).tabNavigation ?? deDE.tabNavigation;
   return (
     <div style={{ display: 'flex', gap: 8, marginBottom: 12, marginTop: 8, alignItems: 'center', flexWrap: 'wrap' }}>
       {optionTabs.map((opt: string) => {
@@ -65,7 +69,7 @@ export default function TabNavigation({
                   cursor: 'pointer',
                   marginLeft: 8
                 }}
-                title="Option löschen"
+                title={copy.deleteOptionLabel}
               >
                 🗑
               </button>
@@ -89,11 +93,11 @@ export default function TabNavigation({
             alignItems: 'center',
             gap: 6,
           }}
-          title="Kalender ein-/ausblenden"
+          title={copy.showCalenderLabel}
         >
           <span style={{ fontSize: 16 }}>📅</span>
           <span style={{ fontSize: 12, opacity: 0.8 }}>
-            {selectedDate ? new Date(selectedDate).toLocaleDateString('de-DE') : 'Heute'}
+            {selectedDate ? new Date(selectedDate).toLocaleDateString('de-DE') : copy.todayLabel}
           </span>
           <span style={{ fontSize: 11, opacity: 0.6 }}>
             {showCalendar ? '▼' : '▶'}

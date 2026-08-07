@@ -1,5 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
+import { getLocaleMessages, useLocale } from "../../../i18n";
+import deDE from "../../../i18n/locales/de-DE";
 
 interface TagFilterProps {
   documentations: any[];
@@ -12,6 +14,8 @@ export default function TagFilter({
   onFilterChange, 
   selectedTags 
 }: TagFilterProps) {
+  const { locale } = useLocale();
+  const copy = getLocaleMessages(locale).tagFilter ?? deDE.tagFilter;
   const [availableTags, setAvailableTags] = useState<string[]>([]);
 
   // Lade verfügbare Tags nur aus den Dokumentationen des aktuellen Projekts
@@ -68,7 +72,7 @@ export default function TagFilter({
           fontWeight: 600, 
           color: 'var(--text-primary)' 
         }}>
-          Nach Tags filtern
+          {copy.header}
         </h3>
         {selectedTags.length > 0 && (
           <button
@@ -83,7 +87,7 @@ export default function TagFilter({
               fontSize: 12
             }}
           >
-            Alle löschen
+            {copy.deleteAllButton}
           </button>
         )}
       </div>
@@ -119,7 +123,7 @@ export default function TagFilter({
             fontSize: 14,
             fontStyle: 'italic'
           }}>
-            Noch keine Tags vorhanden. Fügen Sie Tags zu Ihren Dokumentationen hinzu, um hier zu filtern.
+            {copy.noTagsLabel}
           </div>
         )}
       </div>
@@ -130,7 +134,7 @@ export default function TagFilter({
           fontSize: 12, 
           color: 'var(--text-secondary)' 
         }}>
-          Gefiltert nach: {selectedTags.map(tag => `#${tag}`).join(', ')}
+          {copy.filteredUsingLabel}{selectedTags.map(tag => `#${tag}`).join(', ')}
         </div>
       )}
     </div>

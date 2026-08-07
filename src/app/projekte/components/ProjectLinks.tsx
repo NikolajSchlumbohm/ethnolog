@@ -1,6 +1,10 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
+import { getLocaleMessages, useLocale } from '../../../i18n';
+import  deDE from '../../../i18n/locales/de-DE';
+
+
 
 interface ProjectLinksProps {
   projekt: any;
@@ -25,6 +29,8 @@ export default function ProjectLinks({ projekt, user, canEdit }: ProjectLinksPro
   const [editingLink, setEditingLink] = useState<ProjectLink | null>(null);
   const [formData, setFormData] = useState({ name: '', url: '' });
   const [error, setError] = useState('');
+  const { locale } = useLocale();
+  const copy = getLocaleMessages(locale).projectLinks ?? deDE.projectLinks;
 
   useEffect(() => {
     if (projekt?.id) {
@@ -90,12 +96,12 @@ export default function ProjectLinks({ projekt, user, canEdit }: ProjectLinksPro
 
     // Validierung
     if (!formData.name.trim()) {
-      setError('Bitte geben Sie einen Namen ein');
+      setError(copy.enterNameError);
       return;
     }
 
     if (!formData.url.trim()) {
-      setError('Bitte geben Sie eine URL ein');
+      setError(copy.enterUrlError);
       return;
     }
 
@@ -182,7 +188,7 @@ export default function ProjectLinks({ projekt, user, canEdit }: ProjectLinksPro
           e.currentTarget.style.background = 'transparent';
         }}
       >
-        <span>Interaktions- und Arbeitsräume</span>
+        <span>{copy.interationAndWorkSpaces}</span>
         <span>{isOpen ? '▼' : '▶'}</span>
       </button>
 
@@ -196,7 +202,7 @@ export default function ProjectLinks({ projekt, user, canEdit }: ProjectLinksPro
               {/* Links-Liste */}
               {links.length === 0 ? (
                 <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                  Noch keine Links vorhanden
+                  {copy.noLinksAvailable}
                 </p>
               ) : (
                 <div style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -252,7 +258,7 @@ export default function ProjectLinks({ projekt, user, canEdit }: ProjectLinksPro
                               fontWeight: 600
                             }}
                           >
-                            Bearbeiten
+                            {copy.editButton}
                           </button>
                           <button
                             onClick={() => handleDeleteLink(link.id)}
@@ -267,7 +273,7 @@ export default function ProjectLinks({ projekt, user, canEdit }: ProjectLinksPro
                               fontWeight: 600
                             }}
                           >
-                            Löschen
+                            {copy.deleteButton}
                           </button>
                         </div>
                       )}
@@ -293,19 +299,19 @@ export default function ProjectLinks({ projekt, user, canEdit }: ProjectLinksPro
                         fontWeight: 600
                       }}
                     >
-                      + Link hinzufügen
+                      {copy.addLinkButton}
                     </button>
                   ) : (
                     <form onSubmit={handleSaveLink} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                       <div>
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                          Name (z.B. GitHub, Slack, etc.)
+                          {copy.linkNameLabel}
                         </label>
                         <input
                           type="text"
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          placeholder="z.B. GitHub"
+                          placeholder={copy.egGithubPlaceholder}
                           style={{
                             width: '100%',
                             padding: '0.75rem',
@@ -358,7 +364,7 @@ export default function ProjectLinks({ projekt, user, canEdit }: ProjectLinksPro
                             fontWeight: 600
                           }}
                         >
-                          {editingLink ? 'Speichern' : 'Hinzufügen'}
+                          {editingLink ? copy.editSaveButton : copy.editAddButton}
                         </button>
                         <button
                           type="button"
@@ -374,7 +380,7 @@ export default function ProjectLinks({ projekt, user, canEdit }: ProjectLinksPro
                             fontWeight: 600
                           }}
                         >
-                          Abbrechen
+                          {copy.cancelButton}
                         </button>
                       </div>
                     </form>

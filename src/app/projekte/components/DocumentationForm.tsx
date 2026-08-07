@@ -5,6 +5,12 @@ import SecureFileDisplay from './SecureFileDisplay';
 import TagInput from './TagInput';
 import AudioRecorder from './AudioRecorder';
 
+
+import { getLocaleMessages, useLocale } from '../../../i18n';
+import  deDE from '../../../i18n/locales/de-DE';
+
+
+
 interface DocumentationFormProps {
   projekt: any;
   selectedDate: string;
@@ -25,6 +31,8 @@ export default function DocumentationForm({
   const [liveDocumentationType, setLiveDocumentationType] = useState<'meeting' | 'interview' | 'fieldnote' | 'archiv' | null>(
     editingDocumentation?.untertyp || (editingDocumentation?.typ === 'archiv' ? 'archiv' : null)
   );
+
+
   const [formData, setFormData] = useState<any>(() => {
          if (editingDocumentation) {
        return {
@@ -68,6 +76,9 @@ export default function DocumentationForm({
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioFileName, setAudioFileName] = useState<string | null>(null);
   const [showAudioRecorder, setShowAudioRecorder] = useState(false);
+  const { locale } = useLocale();
+  const copy = getLocaleMessages(locale).documentationForm ?? deDE.documentationForm;
+
 
   const handleAddPerson = () => {
     if (!newPerson.nachname.trim()) return;
@@ -132,7 +143,7 @@ export default function DocumentationForm({
         const file = files[i];
         const fileName = `documentation-${Date.now()}-${i}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
         
-        console.log('Uploading file:', fileName, file.type, file.size);
+        console.log(copy.consoleMessage, fileName, file.type, file.size);
         
         const { data, error } = await supabase.storage
           .from('documentation-files')
@@ -142,12 +153,12 @@ export default function DocumentationForm({
           });
 
         if (error) {
-          console.error('Upload error for file:', fileName, error);
-          alert(`Fehler beim Upload von ${file.name}: ${error.message}`);
+          console.error(copy.consoleError, fileName, error);
+          alert(`${copy.userAlert} ${file.name}: ${error.message}`);
           continue;
         }
 
-        console.log('Upload successful for file:', fileName);
+        console.log(copy.consoleSuccess, fileName);
         
         // Speichere nur den Dateinamen, nicht die URL
         uploadedFiles.push({
@@ -156,7 +167,7 @@ export default function DocumentationForm({
           type: file.type,
           size: file.size
         });
-        console.log('File uploaded:', fileName);
+        console.log(copy.consoleFinish, fileName);
       }
 
       setFormData((prev: any) => ({
@@ -165,11 +176,11 @@ export default function DocumentationForm({
       }));
       
       if (uploadedFiles.length > 0) {
-        alert(`${uploadedFiles.length} Datei(en) erfolgreich hochgeladen!`);
+        alert(`${copy.userAlertFinish}`);
       }
     } catch (error) {
-      console.error('General upload error:', error);
-      alert('Fehler beim Datei-Upload: ' + error);
+      console.error(copy.generalConsoleError, error);
+      alert(`${copy.userErrorAlert} ${error}`);
     } finally {
       setUploading(false);
     }
@@ -198,7 +209,7 @@ export default function DocumentationForm({
       setUploading(true);
       const sanitizedFileName = `audio-${Date.now()}-${audioFileName.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
       
-      console.log('Uploading audio file:', sanitizedFileName, audioBlob.type, audioBlob.size);
+      console.log(copy.uploadConsoleMessage, sanitizedFileName, audioBlob.type, audioBlob.size);
       
       // Upload ohne contentType Parameter - wie bei normalem File-Upload
       const { data, error } = await supabase.storage
@@ -209,12 +220,12 @@ export default function DocumentationForm({
         });
 
       if (error) {
-        console.error('Audio upload error:', error);
-        alert(`Fehler beim Upload der Audiodatei: ${error.message}`);
+        console.error(copy.uploadAudioConsoleError, error);
+        alert(`${copy.uploadAudioErrorUserAlert} ${error.message}`);
         return null;
       }
 
-      console.log('Audio upload successful:', sanitizedFileName);
+      console.log(copy.uploadAudioSuccessConsoleMessage, sanitizedFileName);
       
       return {
         name: audioFileName,
@@ -223,8 +234,8 @@ export default function DocumentationForm({
         size: audioBlob.size
       };
     } catch (error) {
-      console.error('General audio upload error:', error);
-      alert('Fehler beim Audio-Upload: ' + error);
+      console.error(copy.uploadAudioGeneralConsoleError, error);
+      alert(`${copy.uploadAudioErrorUserAlert} ${error}`);
       return null;
     } finally {
       setUploading(false);
@@ -286,15 +297,15 @@ export default function DocumentationForm({
                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
            <h2 style={{ margin: 0, color: 'var(--text-primary)' }}>
              {editingDocumentation ? 
-               `${liveDocumentationType === 'meeting' ? 'Meeting' :
-                  liveDocumentationType === 'interview' ? 'Interview' :
-                  liveDocumentationType === 'fieldnote' ? 'Feldnotiz' :
-                  liveDocumentationType === 'archiv' ? 'Archiv-Dokumentation' :
-                  'Dokumentation'} bearbeiten` :
-               `${liveDocumentationType === 'meeting' ? 'Meeting' :
-                  liveDocumentationType === 'interview' ? 'Interview' :
-                  liveDocumentationType === 'fieldnote' ? 'Feldnotiz' :
-                  liveDocumentationType === 'archiv' ? 'Archiv-Dokumentation' :
+               `${liveDocumentationType === 'meeting' ? copy.meetingDocumentationTypeButton:
+                  liveDocumentationType === 'interview' ? copy.interviewDocumentationTypeButton :
+                  liveDocumentationType === 'fieldnote' ? copy.fieldNoteDocumentationTypeButton :
+                  liveDocumentationType === 'archiv' ? copy.archiveDocumentationTypeButton :
+                  copy.editDocoumentationTypeButton}` :
+               `${liveDocumentationType === 'meeting' ? copy.meetingDocumentationTypeButton :
+                  liveDocumentationType === 'interview' ? copy.interviewDocumentationTypeButton :
+                  liveDocumentationType === 'fieldnote' ? copy.fieldNoteDocumentationTypeButton :
+                  liveDocumentationType === 'archiv' ? copy.archiveDocumentationTypeButton :
                   'Dokumentation'} erstellen`
              }
            </h2>
@@ -316,7 +327,7 @@ export default function DocumentationForm({
         {documentationType === 'live' && !liveDocumentationType && (
           <div style={{ marginBottom: 24 }}>
             <label style={{ display: 'block', fontWeight: 600, marginBottom: 12, fontSize: 16, color: 'var(--text-primary)' }}>
-              Typ der Dokumentation:
+              {copy.documentationTypeLabel}
             </label>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
               <button
@@ -332,7 +343,7 @@ export default function DocumentationForm({
                   fontSize: 14
                 }}
               >
-                📅 Meeting
+                📅 {copy.meetingDocumentationTypeButton}
               </button>
               <button
                 onClick={() => setLiveDocumentationType('interview')}
@@ -347,7 +358,7 @@ export default function DocumentationForm({
                   fontSize: 14
                 }}
               >
-                🎤 Interview
+                🎤 {copy.interviewDocumentationTypeButton}
               </button>
               <button
                 onClick={() => setLiveDocumentationType('fieldnote')}
@@ -362,7 +373,7 @@ export default function DocumentationForm({
                   fontSize: 14
                 }}
               >
-                📝 Feldnotiz
+                📝 {copy.fieldNoteDocumentationTypeButton}
               </button>
               <button
                 onClick={() => setLiveDocumentationType('archiv')}
@@ -377,7 +388,7 @@ export default function DocumentationForm({
                   fontSize: 14
                 }}
               >
-                📦 Archiv-Dokumentation
+                📦 {copy.archiveDocumentationTypeButton}
               </button>
             </div>
           </div>
@@ -389,7 +400,7 @@ export default function DocumentationForm({
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
               <div>
                 <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14, color: 'var(--text-primary)' }}>
-                  Name *
+                  {copy.nameLabel}
                 </label>
                 <input
                   type="text"
@@ -404,12 +415,12 @@ export default function DocumentationForm({
                     background: 'var(--surface)',
                     color: 'var(--text-primary)'
                   }}
-                  placeholder="Name der Dokumentation"
+                  placeholder={copy.placeholderDocumentationNameTitle}
                 />
               </div>
               <div>
                 <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14 }}>
-                  Datum
+                  {copy.dateLabel}
                 </label>
                 <input
                   type="date"
@@ -430,7 +441,7 @@ export default function DocumentationForm({
 
             <div>
               <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14 }}>
-                {liveDocumentationType === 'fieldnote' ? 'Notizen' : 'Beschreibung'}
+                {liveDocumentationType === 'fieldnote' ? copy.liveDocumentationTypeNotesLabel : copy.liveDocumentationTypeDescriptionLabel}
               </label>
               <textarea
                 value={formData.beschreibung}
@@ -444,26 +455,26 @@ export default function DocumentationForm({
                   fontSize: 14,
                   resize: 'vertical'
                 }}
-                placeholder={liveDocumentationType === 'fieldnote' ? 'Notizen zur Feldnotiz...' : 'Beschreibung der Dokumentation...'}
+                placeholder={liveDocumentationType === 'fieldnote' ? copy.placeholderNotesTitle : copy.placeholderDocumentationDescriptionTitle}
               />
             </div>
 
             {/* Tags */}
             <div>
               <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14, color: 'var(--text-primary)' }}>
-                Tags
+                {copy.tagsLabel}
               </label>
               <TagInput
                 selectedTags={formData.tags || []}
                 onTagsChange={handleTagsChange}
-                placeholder="Tag eingeben oder aus Vorschlägen wählen..."
+                placeholder={copy.placeholderTagSelectionTitle}
               />
             </div>
 
             {/* Status */}
             <div>
               <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14, color: 'var(--text-primary)' }}>
-                Status
+                {copy.statusLabel}
               </label>
               <select
                 value={formData.status || 'unfertig'}
@@ -478,15 +489,15 @@ export default function DocumentationForm({
                   color: 'var(--text-primary)'
                 }}
               >
-                <option value="unfertig">Unfertig</option>
-                <option value="fertig">Fertig</option>
+                <option value="unfertig">{copy.incompleteOptionLabel}</option>
+                <option value="fertig">{copy.completeOptionLabel}</option>
               </select>
             </div>
 
                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                <div>
                  <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14 }}>
-                   Startzeit (optional)
+                   {copy.startingTimeOptionalLabel}
                  </label>
                  <input
                    type="time"
@@ -503,7 +514,7 @@ export default function DocumentationForm({
                </div>
                <div>
                  <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14 }}>
-                   Endzeit (optional)
+                    {copy.endingTimeOptionalLabel}
                  </label>
                  <input
                    type="time"
@@ -526,7 +537,7 @@ export default function DocumentationForm({
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                   <div>
                     <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14 }}>
-                      Meeting-Typ
+                     {copy.meetingTypeLabel}
                     </label>
                     <select
                       value={formData.meetingTyp || ''}
@@ -539,15 +550,15 @@ export default function DocumentationForm({
                         fontSize: 14
                       }}
                     >
-                      <option value="">Bitte wählen...</option>
-                      <option value="online">Online</option>
-                      <option value="offline">Offline</option>
-                      <option value="hybrid">Hybrid</option>
+                      <option value="">{copy.pleaseChooseDropdownOption}</option>
+                      <option value="online">{copy.onlineOptionDropdownOption}</option>
+                      <option value="offline">{copy.offlineOptionDropdownOption}</option>
+                      <option value="hybrid">{copy.hybridOptionDropdownOption}</option>
                     </select>
                   </div>
                   <div>
                     <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14 }}>
-                      Klient
+                      {copy.clientLabel}
                     </label>
                     <input
                       type="text"
@@ -560,7 +571,7 @@ export default function DocumentationForm({
                         border: '1px solid #ddd',
                         fontSize: 14
                       }}
-                      placeholder="Klientname oder 'Ohne Klient'"
+                      placeholder={copy.clientOrWithoutClientPlaceholderLabel}
                     />
                   </div>
                 </div>
@@ -568,33 +579,33 @@ export default function DocumentationForm({
                 {/* Personen für Meeting */}
                 <div>
                   <label style={{ display: 'block', fontWeight: 600, marginBottom: 12, fontSize: 14 }}>
-                    Teilnehmer hinzufügen
+                    {copy.addMemberLabel}
                   </label>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr auto', gap: 8, alignItems: 'end', marginBottom: 12 }}>
                     <input
                       type="text"
-                      placeholder="Vorname"
+                      placeholder={copy.surnamePlaceholderLabel}
                       value={newPerson.vorname}
                       onChange={(e) => setNewPerson(prev => ({ ...prev, vorname: e.target.value }))}
                       style={{ padding: 8, borderRadius: 4, border: '1px solid #ddd', fontSize: 12 }}
                     />
                     <input
                       type="text"
-                      placeholder="Nachname *"
+                      placeholder={copy.lastnamePlaceholderLabel}
                       value={newPerson.nachname}
                       onChange={(e) => setNewPerson(prev => ({ ...prev, nachname: e.target.value }))}
                       style={{ padding: 8, borderRadius: 4, border: '1px solid #ddd', fontSize: 12 }}
                     />
                     <input
                       type="email"
-                      placeholder="E-Mail"
+                      placeholder={copy.emailPlaceholderLabel}
                       value={newPerson.email}
                       onChange={(e) => setNewPerson(prev => ({ ...prev, email: e.target.value }))}
                       style={{ padding: 8, borderRadius: 4, border: '1px solid #ddd', fontSize: 12 }}
                     />
                     <input
                       type="text"
-                      placeholder="Position"
+                      placeholder={copy.postitionPlaceholderLabel}
                       value={newPerson.position}
                       onChange={(e) => setNewPerson(prev => ({ ...prev, position: e.target.value }))}
                       style={{ padding: 8, borderRadius: 4, border: '1px solid #ddd', fontSize: 12 }}
@@ -618,7 +629,7 @@ export default function DocumentationForm({
                   
                   {formData.personen.length > 0 && (
                     <div style={{ marginTop: 12 }}>
-                      <div style={{ fontWeight: 600, marginBottom: 8, fontSize: 14 }}>Teilnehmer:</div>
+                      <div style={{ fontWeight: 600, marginBottom: 8, fontSize: 14 }}>{copy.membersLabel}</div>
                       {formData.personen.map((person: any, index: number) => (
                         <div key={person.id} style={{ 
                           display: 'flex', 
@@ -659,7 +670,7 @@ export default function DocumentationForm({
               <>
                 <div>
                   <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14, color: 'var(--text-primary)' }}>
-                    Interview-Typ
+                    {copy.interviewTypeLabel}
                   </label>
                   <select
                     value={formData.interviewTyp || ''}
@@ -672,17 +683,17 @@ export default function DocumentationForm({
                       fontSize: 14
                     }}
                   >
-                    <option value="">Bitte wählen...</option>
-                    <option value="online">Online</option>
-                    <option value="offline">Offline</option>
-                    <option value="hybrid">Hybrid</option>
+                    <option value="">{copy.pleaseChooseDropdownOption}</option>
+                    <option value="online">{copy.onlineOptionDropdownOption}</option>
+                    <option value="offline">{copy.offlineOptionDropdownOption}</option>
+                    <option value="hybrid">{copy.hybridOptionDropdownOption}</option>
                   </select>
                 </div>
 
                 {/* Kernfragen für Interview */}
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                    <label style={{ fontWeight: 600, fontSize: 14 }}>Kernfragen & Antworten</label>
+                    <label style={{ fontWeight: 600, fontSize: 14 }}>{copy.coreQuestionLabel}</label>
                     <button
                       onClick={handleAddKernfrage}
                       style={{
@@ -695,7 +706,7 @@ export default function DocumentationForm({
                         fontSize: 12
                       }}
                     >
-                      + Kernfrage
+                      {copy.addCoreQuestionButton}
                     </button>
                   </div>
                   {formData.kernfragen.map((kernfrage: any, index: number) => (
@@ -706,7 +717,7 @@ export default function DocumentationForm({
                       marginBottom: 8 
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                        <span style={{ fontWeight: 600, fontSize: 12 }}>Kernfrage {index + 1}</span>
+                        <span style={{ fontWeight: 600, fontSize: 12 }}>{copy.coreQuestionLabel_2} {index + 1}</span>
                         <button
                           onClick={() => handleRemoveKernfrage(index)}
                           style={{
@@ -724,7 +735,7 @@ export default function DocumentationForm({
                       </div>
                       <input
                         type="text"
-                        placeholder="Frage"
+                        placeholder={copy.questionPlaceholder}
                         value={kernfrage.frage}
                         onChange={(e) => {
                           const newKernfragen = [...formData.kernfragen];
@@ -741,7 +752,7 @@ export default function DocumentationForm({
                         }}
                       />
                       <textarea
-                        placeholder="Antwort"
+                        placeholder={copy.answer}
                         value={kernfrage.antwort}
                         onChange={(e) => {
                           const newKernfragen = [...formData.kernfragen];
@@ -768,7 +779,7 @@ export default function DocumentationForm({
             {(liveDocumentationType === 'meeting' || liveDocumentationType === 'interview') && (
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <label style={{ fontWeight: 600, fontSize: 14 }}>Dialoge</label>
+                  <label style={{ fontWeight: 600, fontSize: 14 }}>{copy.dialogueText}</label>
                   <button
                     onClick={handleAddDialog}
                     style={{
@@ -781,7 +792,7 @@ export default function DocumentationForm({
                       fontSize: 12
                     }}
                   >
-                    + Dialog
+                    {copy.dialogueButton}
                   </button>
                 </div>
                 {formData.dialoge.map((dialog: any, index: number) => (
@@ -792,7 +803,7 @@ export default function DocumentationForm({
                     marginBottom: 8 
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                      <span style={{ fontWeight: 600, fontSize: 12 }}>Dialog {index + 1}</span>
+                      <span style={{ fontWeight: 600, fontSize: 12 }}>{copy.dialogueText} {index + 1}</span>
                       <button
                         onClick={() => handleRemoveDialog(index)}
                         style={{
@@ -809,7 +820,7 @@ export default function DocumentationForm({
                       </button>
                     </div>
                     <textarea
-                      placeholder="Dialogtext..."
+                      placeholder= {copy.dialoguePlaceholder}
                       value={dialog.text}
                       onChange={(e) => {
                         const newDialoge = [...formData.dialoge];
@@ -841,7 +852,7 @@ export default function DocumentationForm({
                   marginBottom: 12 
                 }}>
                   <label style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-primary)' }}>
-                    🎤 Audio-Aufnahme
+                    {copy.audioRecordingLabel}
                   </label>
                   {!showAudioRecorder && !audioBlob && (
                     <button
@@ -857,7 +868,7 @@ export default function DocumentationForm({
                         fontWeight: 600
                       }}
                     >
-                      🎙️ Aufnahme starten
+                      {copy.startRecordingButton}
                     </button>
                   )}
                 </div>
@@ -884,7 +895,7 @@ export default function DocumentationForm({
                       color: 'var(--primary-green)',
                       fontWeight: 600
                     }}>
-                      ✓ Audio-Aufnahme bereit ({audioFileName})
+                      {copy.audioReadyLabel} ({audioFileName})
                     </div>
                     <button
                       onClick={() => {
@@ -903,7 +914,7 @@ export default function DocumentationForm({
                         fontWeight: 600
                       }}
                     >
-                      🗑️ Aufnahme entfernen
+                      {copy.removeRecordingButton}
                     </button>
                   </div>
                 )}
@@ -913,7 +924,7 @@ export default function DocumentationForm({
             {/* Datei-Upload */}
             <div>
               <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14, color: 'var(--text-primary)' }}>
-                Dateien hochladen (Fotos, Audio, Video)
+                {copy.uploadFilesLabel}
               </label>
               <input
                 type="file"
@@ -928,11 +939,11 @@ export default function DocumentationForm({
                   fontSize: 14
                 }}
               />
-              {uploading && <div style={{ marginTop: 8, color: 'var(--text-muted)', fontSize: 12 }}>Upload läuft...</div>}
+              {uploading && <div style={{ marginTop: 8, color: 'var(--text-muted)', fontSize: 12 }}>{copy.uploadingLabel}</div>}
               
                              {formData.dateien.length > 0 && (
                  <div style={{ marginTop: 12 }}>
-                   <div style={{ fontWeight: 600, marginBottom: 8, fontSize: 14 }}>Hochgeladene Dateien:</div>
+                   <div style={{ fontWeight: 600, marginBottom: 8, fontSize: 14 }}>{copy.uploadedFilesLabel}</div>
                    {formData.dateien.map((file: any, index: number) => (
                      <SecureFileDisplay
                        key={index}
@@ -959,7 +970,7 @@ export default function DocumentationForm({
                   fontSize: 14
                 }}
               >
-                Abbrechen
+                {copy.cancelButton}
               </button>
               <button
                 onClick={handleSave}
@@ -975,7 +986,7 @@ export default function DocumentationForm({
                   fontSize: 14
                 }}
               >
-                Speichern
+                {copy.saveButton}
               </button>
             </div>
           </div>

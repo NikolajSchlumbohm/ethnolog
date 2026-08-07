@@ -1,6 +1,9 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
+import { getLocaleMessages, useLocale } from '../../../i18n';
+import  deDE from '../../../i18n/locales/de-DE';
+
 
 interface ProjectMembersProps {
   projekt: any;
@@ -28,6 +31,8 @@ export default function ProjectMembers({ projekt, user, onMembersChange }: Proje
   const [newMemberEmail, setNewMemberEmail] = useState('');
   const [error, setError] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const { locale } = useLocale();
+  const copy = getLocaleMessages(locale).projectMembers ?? deDE.projectMembers;
 
   const isOwner = projekt.user_id === user.id;
 
@@ -69,7 +74,7 @@ export default function ProjectMembers({ projekt, user, onMembersChange }: Proje
 
           if (emailsError) {
             // Detaillierte Fehlerausgabe
-            console.warn('RPC-Funktion fehlgeschlagen:', {
+            console.warn(copy.rpcFunctionConsoleError, {
               code: emailsError.code,
               message: emailsError.message,
               details: emailsError.details,
@@ -77,7 +82,7 @@ export default function ProjectMembers({ projekt, user, onMembersChange }: Proje
             });
             
             // Fallback: Versuche View
-            console.warn('Versuche View als Fallback...');
+            console.warn(copy.viewFallbackConsoleWarning);
             try {
               const { data: viewData, error: viewError } = await supabase
                 .from('user_emails')
@@ -85,52 +90,52 @@ export default function ProjectMembers({ projekt, user, onMembersChange }: Proje
                 .in('user_id', allUserIds);
               
               if (viewError) {
-                console.error('Auch View-Zugriff fehlgeschlagen:', {
+                console.error(copy.viewFallbackConsoleError, {
                   code: viewError.code,
                   message: viewError.message,
                   details: viewError.details,
                   hint: viewError.hint
                 });
-                console.error('WICHTIG: Bitte führen Sie setup_user_emails_complete.sql im Supabase SQL Editor aus!');
+                console.error(copy.sqlSetupConsoleError);
               } else if (viewData && Array.isArray(viewData)) {
-                console.log('View-Daten erhalten:', viewData);
+                console.log(copy.gotViewDataConsoleLog, viewData);
                 viewData.forEach((item: any) => {
                   if (item.user_id && item.email) {
                     userEmailsMap[item.user_id] = item.email;
                   }
                 });
-                console.log('E-Mail-Adressen über View geladen:', Object.keys(userEmailsMap).length, 'Einträge');
-                console.log('E-Mail-Map nach View:', userEmailsMap);
+                console.log(copy.loadedEmailAddressesViaView, Object.keys(userEmailsMap).length, 'Einträge');
+                console.log(copy.emailMapAfterView, userEmailsMap);
               } else {
-                console.warn('View gab keine Daten zurück:', viewData);
+                console.warn(copy.viewDidNotReturnDataWarning, viewData);
               }
             } catch (viewErr: any) {
-              console.error('Fehler beim View-Zugriff:', viewErr);
+              console.error(copy.viewFallbackConsoleError_2, viewErr);
             }
           } else if (emailsData && Array.isArray(emailsData)) {
             // RPC-Funktion erfolgreich
-            console.log('RPC-Daten erhalten:', emailsData);
+            console.log(copy.gotRPCDataConsoleLog, emailsData);
             emailsData.forEach((item: any) => {
               if (item.user_id && item.email) {
                 userEmailsMap[item.user_id] = item.email;
               }
             });
-            console.log('E-Mail-Adressen über RPC geladen:', Object.keys(userEmailsMap).length, 'Einträge');
-            console.log('E-Mail-Map nach RPC:', userEmailsMap);
+            console.log(copy.loadedEmailAddressesViaRPCConsoleLog, Object.keys(userEmailsMap).length, 'Einträge');
+            console.log(copy.emailMapAfterRPCConsoleLog, userEmailsMap);
           } else {
-            console.warn('RPC-Funktion gab keine Daten zurück:', emailsData);
+            console.warn(copy.rpcFunctionDidNotReturnDataWarning, emailsData);
           }
         } catch (err: any) {
-          console.error('Fehler beim Laden der E-Mail-Adressen:', err);
-          console.error('WICHTIG: Bitte führen Sie setup_user_emails_complete.sql im Supabase SQL Editor aus!');
+          console.error(copy.emailAddressLoadingConsoleError, err);
+          console.error(copy.sqlSetupNecessaryConsoleError);
         }
       }
 
       // Debug: Zeige geladene E-Mail-Adressen
-      console.log('Geladene E-Mail-Adressen:', userEmailsMap);
-      console.log('Anzahl geladener E-Mails:', Object.keys(userEmailsMap).length);
-      console.log('Projektbesitzer user_id:', projekt.user_id);
-      console.log('Projektbesitzer E-Mail:', userEmailsMap[projekt.user_id]);
+      console.log(copy.loadedEmailAddresses, userEmailsMap);
+      console.log(copy.numberOfLoadedEmailAddresses, Object.keys(userEmailsMap).length);
+      console.log(copy.userIdOfProjectOwner, projekt.user_id);
+      console.log(copy.emailOfProjectOwner, userEmailsMap[projekt.user_id]);
 
       // Erstelle Mitgliederliste mit E-Mail-Adressen
       const membersList: ProjectMember[] = [];
@@ -188,7 +193,7 @@ export default function ProjectMembers({ projekt, user, onMembersChange }: Proje
 
       setMembers(membersList);
     } catch (err: any) {
-      console.error('Fehler beim Laden der Mitglieder:', err);
+      console.error(copy.loadingMembersConsoleError, err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -197,7 +202,7 @@ export default function ProjectMembers({ projekt, user, onMembersChange }: Proje
 
   const addMember = async () => {
     if (!newMemberEmail.trim()) {
-      setError('Bitte geben Sie eine E-Mail-Adresse ein.');
+      setError(copy.enterEmailUserError);
       return;
     }
 
@@ -239,23 +244,23 @@ export default function ProjectMembers({ projekt, user, onMembersChange }: Proje
         // Fallback: Versuche es manuell
         // Wir müssen zuerst die user_id finden
         // Da wir keinen direkten Zugriff haben, zeigen wir eine Fehlermeldung
-        throw new Error('Benutzer nicht gefunden. Bitte stellen Sie sicher, dass der Benutzer bereits registriert ist.');
+        throw new Error(copy.userNotFoundUserAlert);
       }
 
       setNewMemberEmail('');
       await loadMembers();
       if (onMembersChange) onMembersChange();
-      alert('Mitglied erfolgreich hinzugefügt!');
+      alert(copy.addedMemberSuccessUserAlert);
     } catch (err: any) {
-      console.error('Fehler beim Hinzufügen des Mitglieds:', err);
-      setError(err.message || 'Fehler beim Hinzufügen des Mitglieds');
+      console.error(copy.addMemberConsoleError, err);
+      setError(err.message || copy.addMemberErrorUserAlert);
     } finally {
       setAddingMember(false);
     }
   };
 
   const removeMember = async (memberId: string, userId: string) => {
-    if (!confirm('Möchten Sie dieses Mitglied wirklich entfernen?')) return;
+    if (!confirm(copy.removeMemberConfirmation)) return;
 
     try {
       const { error } = await supabase
@@ -267,17 +272,17 @@ export default function ProjectMembers({ projekt, user, onMembersChange }: Proje
 
       await loadMembers();
       if (onMembersChange) onMembersChange();
-      alert('Mitglied erfolgreich entfernt!');
+      alert(copy.removedMemberSuccessUserAlert);
     } catch (err: any) {
-      console.error('Fehler beim Entfernen des Mitglieds:', err);
-      alert('Fehler beim Entfernen: ' + err.message);
+      console.error(copy.removedMemmberConsoleError, err);
+      alert(copy.removedMemberErrorUserAlert + err.message);
     }
   };
 
   // Alternative Implementierung: Finde Benutzer direkt über E-Mail
   const addMemberByEmail = async () => {
     if (!newMemberEmail.trim()) {
-      setError('Bitte geben Sie eine E-Mail-Adresse ein.');
+      setError(copy.enterEmailUserAlert);
       return;
     }
 
@@ -296,41 +301,39 @@ export default function ProjectMembers({ projekt, user, onMembersChange }: Proje
       });
 
       if (addError) {
-        console.error('RPC Error:', addError);
+        console.error(copy.rpcConsoleError, addError);
         
         // Prüfe, ob die Funktion nicht existiert
         if (addError.code === '42883' || addError.message?.includes('function') || addError.message?.includes('does not exist')) {
-          setError('Die SQL-Funktion wurde noch nicht erstellt. Bitte führen Sie das Skript "add_project_member_function.sql" im Supabase SQL Editor aus.');
+          setError(copy.sqlFunctionNotCreatedUserAlert);
           return;
         }
         
         // Prüfe, ob der Benutzer nicht gefunden wurde
         if (addError.message?.includes('nicht gefunden') || addError.message?.includes('not found')) {
-          setError(`Benutzer mit E-Mail "${normalizedEmail}" wurde nicht gefunden. Bitte überprüfen Sie:
-- Ist die E-Mail-Adresse korrekt geschrieben?
-- Hat der Benutzer sich bereits registriert?
-- Versuchen Sie es mit der exakten E-Mail-Adresse, die bei der Registrierung verwendet wurde.`);
+          setError(copy.userNotFoundCheckPossibilitesUserAlert.replace('{{normalizedEmail}}', normalizedEmail));
           return;
         }
         
         // Prüfe, ob der Benutzer bereits Mitglied ist
         if (addError.message?.includes('bereits Mitglied') || addError.message?.includes('already')) {
-          setError('Dieser Benutzer ist bereits Mitglied des Projekts.');
+          setError(copy.userAlreadyMemberUserAlert);
           return;
         }
         
+        
         // Allgemeine Fehlermeldung
-        setError(addError.message || 'Fehler beim Hinzufügen des Mitglieds. Bitte versuchen Sie es erneut.');
+        setError(addError.message || copy.addedMemberConsoleError);
         return;
       }
 
       setNewMemberEmail('');
       await loadMembers();
       if (onMembersChange) onMembersChange();
-      alert('Mitglied erfolgreich hinzugefügt!');
+      alert(copy.addedMemberSuccessUserAlert);
     } catch (err: any) {
-      console.error('Fehler beim Hinzufügen:', err);
-      setError(err.message || 'Fehler beim Hinzufügen des Mitglieds. Stellen Sie sicher, dass der Benutzer registriert ist.');
+      console.error(copy.addMemberConsoleError, err);
+      setError(err.message || copy.addMemberErrorUserAlert_2);
     } finally {
       setAddingMember(false);
     }
@@ -356,7 +359,7 @@ export default function ProjectMembers({ projekt, user, onMembersChange }: Proje
             fontWeight: 600
           }}
         >
-          <span>👥 Mitglieder ({members.length})</span>
+          <span>👥 {copy.membersLabel} ({members.length})</span>
           <span>{isOpen ? '▼' : '▶'}</span>
         </button>
         
@@ -369,9 +372,9 @@ export default function ProjectMembers({ projekt, user, onMembersChange }: Proje
             borderRadius: 6
           }}>
             {loading ? (
-              <p style={{ color: 'var(--text-muted)' }}>Lade Mitglieder...</p>
+              <p style={{ color: 'var(--text-muted)' }}>{copy.loadingMembersLabel}</p>
             ) : members.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)' }}>Noch keine Mitglieder</p>
+              <p style={{ color: 'var(--text-muted)' }}>{copy.noMembersYetLabel}</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {members.map((member) => (
@@ -389,7 +392,7 @@ export default function ProjectMembers({ projekt, user, onMembersChange }: Proje
                       {member.user?.user_metadata?.display_name || member.user?.email || 'Unbekannt'}
                     </div>
                     <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                      {member.user?.email || 'E-Mail nicht verfügbar'}
+                      {member.user?.email || copy.emailNotFoundShortLabel}
                     </div>
                     <span style={{ 
                       marginTop: '4px',
@@ -431,7 +434,7 @@ export default function ProjectMembers({ projekt, user, onMembersChange }: Proje
           fontWeight: 600
         }}
       >
-        <span>👥 Mitglieder ({members.length})</span>
+        <span>👥 {copy.membersLabel} ({members.length})</span>
         <span>{isOpen ? '▼' : '▶'}</span>
       </button>
       
@@ -452,7 +455,7 @@ export default function ProjectMembers({ projekt, user, onMembersChange }: Proje
               color: 'var(--text-primary)',
               fontSize: '0.9rem'
             }}>
-              Neues Mitglied hinzufügen (E-Mail):
+              {copy.addNewMemberButton}
             </label>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <input
@@ -462,7 +465,7 @@ export default function ProjectMembers({ projekt, user, onMembersChange }: Proje
                   setNewMemberEmail(e.target.value);
                   setError('');
                 }}
-                placeholder="benutzer@example.com"
+                placeholder= {copy.emailPlaceholder}
                 style={{
                   flex: 1,
                   padding: '0.5rem',
@@ -520,13 +523,13 @@ export default function ProjectMembers({ projekt, user, onMembersChange }: Proje
                     fontSize: '0.8rem',
                     color: 'var(--text-secondary)'
                   }}>
-                    <strong>Anleitung:</strong>
+                    <strong>{copy.instructionsLabel}</strong>
                     <ol style={{ margin: '0.5rem 0', paddingLeft: '1.5rem' }}>
-                      <li>Öffnen Sie Ihr Supabase Dashboard</li>
-                      <li>Gehen Sie zu "SQL Editor"</li>
-                      <li>Öffnen Sie die Datei "add_project_member_function.sql"</li>
-                      <li>Kopieren Sie den gesamten Inhalt</li>
-                      <li>Führen Sie das Skript im SQL Editor aus</li>
+                      <li>{copy.instructionsText_1}</li>
+                      <li>{copy.instructionsText_2}</li>
+                      <li>{copy.instructionsText_3}</li>
+                      <li>{copy.instructionsText_4}</li>
+                      <li>{copy.instructinonsText_5}</li>
                     </ol>
                   </div>
                 )}
@@ -536,9 +539,9 @@ export default function ProjectMembers({ projekt, user, onMembersChange }: Proje
 
           {/* Mitgliederliste */}
           {loading ? (
-            <p style={{ color: 'var(--text-muted)' }}>Lade Mitglieder...</p>
+            <p style={{ color: 'var(--text-muted)' }}>{copy.loadingMembersLabel}</p>
           ) : members.length === 0 ? (
-            <p style={{ color: 'var(--text-muted)' }}>Noch keine Mitglieder</p>
+            <p style={{ color: 'var(--text-muted)' }}>{copy.noMembersYetLabel}</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {members.map((member) => (
@@ -555,7 +558,7 @@ export default function ProjectMembers({ projekt, user, onMembersChange }: Proje
                 >
                   <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', flex: 1 }}>
                     <div style={{ fontWeight: 600, marginBottom: '2px' }}>
-                      {member.user?.email || member.user?.user_metadata?.display_name || `Benutzer ${member.user_id.substring(0, 8)}...`}
+                      {member.user?.email || member.user?.user_metadata?.display_name || copy.userLabel.replace('{{memberuserid}}', member.user_id.substring(0, 8)) }
                     </div>
                     {member.user?.email ? (
                       <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '4px' }}>
@@ -563,7 +566,7 @@ export default function ProjectMembers({ projekt, user, onMembersChange }: Proje
                       </div>
                     ) : (
                       <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '4px', fontStyle: 'italic' }}>
-                        E-Mail nicht verfügbar (ID: {member.user_id.substring(0, 8)}...)
+                        {copy.emailNotFoundLabel}
                       </div>
                     )}
                     <span style={{ 
@@ -575,7 +578,7 @@ export default function ProjectMembers({ projekt, user, onMembersChange }: Proje
                       fontSize: '0.75rem',
                       fontWeight: 600
                     }}>
-                      {member.role === 'owner' ? 'Besitzer' : member.role === 'read' ? 'Mitglied' : member.role === 'write' ? 'Bearbeiter' : member.role}
+                      {member.role === 'owner' ? copy.ownerAccessLabel : member.role === 'read' ? copy.readAccessLabel : member.role === 'write' ? copy.writeAccessLabel : member.role}
                     </span>
                   </div>
                   {member.role !== 'owner' && (
@@ -593,7 +596,7 @@ export default function ProjectMembers({ projekt, user, onMembersChange }: Proje
                         marginLeft: '0.5rem'
                       }}
                     >
-                      Entfernen
+                      {copy.removeLabel}
                     </button>
                   )}
                 </div>

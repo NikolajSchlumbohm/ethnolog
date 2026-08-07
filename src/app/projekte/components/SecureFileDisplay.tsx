@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
+import deDE from "../../../i18n/locales/de-DE";
+import { getLocaleMessages, useLocale } from "../../../i18n";
 
 interface SecureFileDisplayProps {
   file: {
@@ -16,6 +18,8 @@ export default function SecureFileDisplay({ file, onRemove }: SecureFileDisplayP
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { locale } = useLocale();
+  const copy = getLocaleMessages(locale).secureFileDisplay ?? deDE.secureFileDisplay;
 
   useEffect(() => {
     generateSignedUrl();
@@ -32,8 +36,8 @@ export default function SecureFileDisplay({ file, onRemove }: SecureFileDisplayP
         .createSignedUrl(file.fileName, 3600); // 1 Stunde = 3600 Sekunden
 
       if (error) {
-        console.error('Error generating signed URL:', error);
-        setError('Fehler beim Laden der Datei');
+        console.error(copy.signedUrlGenerationConsoleError, error);
+        setError(copy.fileGenerationError);
         return;
       }
 
@@ -41,8 +45,8 @@ export default function SecureFileDisplay({ file, onRemove }: SecureFileDisplayP
         setSignedUrl(data.signedUrl);
       }
     } catch (err) {
-      console.error('Error generating signed URL:', err);
-      setError('Fehler beim Laden der Datei');
+      console.error(copy.signedUrlGenerationConsoleError, err);
+      setError(copy.fileGenerationError);
     } finally {
       setLoading(false);
     }
@@ -63,8 +67,8 @@ export default function SecureFileDisplay({ file, onRemove }: SecureFileDisplayP
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (err) {
-      console.error('Download error:', err);
-      alert('Fehler beim Download');
+      console.error(copy.downloadConsoleError, err);
+      alert(copy.downloadConsoleError);
     }
   };
 
@@ -112,7 +116,7 @@ export default function SecureFileDisplay({ file, onRemove }: SecureFileDisplayP
               opacity: (!signedUrl || loading) ? 0.6 : 1
             }}
           >
-            {loading ? 'Laden...' : 'Download'}
+            {loading ? copy.loadingLabel : copy.downloadLabel}
           </button>
           {onRemove && (
             <button
@@ -168,7 +172,7 @@ export default function SecureFileDisplay({ file, onRemove }: SecureFileDisplayP
             }}
           >
             <source src={signedUrl} type={file.type} />
-            Dein Browser unterstützt keine Video-Vorschau.
+            {copy.noVideoPreviewAvailableMessage}
           </video>
         </div>
       )}
@@ -181,7 +185,7 @@ export default function SecureFileDisplay({ file, onRemove }: SecureFileDisplayP
             style={{ width: '100%' }}
           >
             <source src={signedUrl} type={file.type} />
-            Dein Browser unterstützt keine Audio-Vorschau.
+            {copy.noAudioPreviewAvailableMessage}
           </audio>
         </div>
       )}

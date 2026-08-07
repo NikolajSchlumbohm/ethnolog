@@ -1,5 +1,9 @@
 "use client";
 import React, { useState, useRef, useEffect } from 'react';
+import deDE from "../../../i18n/locales/de-DE";
+import { getLocaleMessages, useLocale } from "../../../i18n";
+
+
 
 interface AudioRecorderProps {
   onAudioReady: (audioBlob: Blob, fileName: string) => void;
@@ -18,6 +22,8 @@ export default function AudioRecorder({ onAudioReady, onFinish }: AudioRecorderP
   const audioChunksRef = useRef<Blob[]>([]);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const { locale } = useLocale();
+  const copy = getLocaleMessages(locale).audioRecorder ?? deDE.audioRecorder;
 
   useEffect(() => {
     return () => {
@@ -54,7 +60,7 @@ export default function AudioRecorder({ onAudioReady, onFinish }: AudioRecorderP
       for (const mimeType of mimeTypes) {
         if (MediaRecorder.isTypeSupported(mimeType)) {
           selectedMimeType = mimeType;
-          console.log('Using MIME type:', mimeType);
+          console.log(copy.consoleMime, mimeType);
           break;
         }
       }
@@ -62,7 +68,7 @@ export default function AudioRecorder({ onAudioReady, onFinish }: AudioRecorderP
       if (!selectedMimeType) {
         // Fallback: Nutze Standard ohne spezifischen MIME-Type
         selectedMimeType = '';
-        console.log('Using default MIME type');
+        console.log(copy.consoleMimeDefault);
       }
 
       const mediaRecorder = selectedMimeType 
@@ -106,8 +112,8 @@ export default function AudioRecorder({ onAudioReady, onFinish }: AudioRecorderP
       }, 1000);
 
     } catch (err) {
-      console.error('Fehler beim Zugriff auf Mikrofon:', err);
-      setError('Fehler beim Zugriff auf das Mikrofon. Bitte stellen Sie sicher, dass Sie die Berechtigung erteilt haben.');
+      console.error(copy.consoleError, err);
+      setError(copy.userFacingError);
     }
   };
 
@@ -235,10 +241,10 @@ export default function AudioRecorder({ onAudioReady, onFinish }: AudioRecorderP
           }}
           title={
             !isRecording 
-              ? 'Aufnahme starten' 
+              ?  copy.startRecordingButton
               : isPaused 
-                ? 'Aufnahme fortsetzen' 
-                : 'Aufnahme pausieren'
+                ? copy.resumeRecordingButton
+                : copy.pauseRecordingButton
           }
         >
           {!isRecording ? '🎤' : isPaused ? '▶️' : '⏸️'}
@@ -269,7 +275,7 @@ export default function AudioRecorder({ onAudioReady, onFinish }: AudioRecorderP
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'scale(1)';
             }}
-            title="Aufnahme beenden"
+            title = {copy.stopRecordingButton}
           >
             ⏹️
           </button>
@@ -305,10 +311,10 @@ export default function AudioRecorder({ onAudioReady, onFinish }: AudioRecorderP
           color: 'var(--text-secondary)',
           fontWeight: 500
         }}>
-          {!isRecording && !hasRecording && 'Klicken Sie auf das Mikrofon, um die Aufnahme zu starten'}
-          {isRecording && !isPaused && '🔴 Aufnahme läuft...'}
-          {isRecording && isPaused && '⏸️ Aufnahme pausiert'}
-          {hasRecording && '✅ Aufnahme abgeschlossen'}
+          {!isRecording && !hasRecording && copy.unstartedRecordingStatusLabel}
+          {isRecording && !isPaused && '🔴 ' + copy.runningRecordingStatusLabel}
+          {isRecording && isPaused && '⏸️ ' + copy.pausedRecordingStatusLabel}
+          {hasRecording && '✅ ' + copy.finishedRecordingStatusLabel}
         </div>
       </div>
 
@@ -346,7 +352,7 @@ export default function AudioRecorder({ onAudioReady, onFinish }: AudioRecorderP
               fontWeight: 600,
               color: 'var(--text-primary)'
             }}>
-              🎵 Aufnahme-Vorschau:
+              {copy.recordingPreviewLabel}
             </span>
           </div>
           <audio 
@@ -371,7 +377,7 @@ export default function AudioRecorder({ onAudioReady, onFinish }: AudioRecorderP
                 fontWeight: 600
               }}
             >
-              🗑️ Aufnahme löschen
+              {copy.deleteRecordingButton}
             </button>
             <button
               onClick={handleFinish}
@@ -386,7 +392,7 @@ export default function AudioRecorder({ onAudioReady, onFinish }: AudioRecorderP
                 fontWeight: 600
               }}
             >
-              ✓ Aufnahme verwenden
+              {copy.useRecordingButton}
             </button>
           </div>
         </div>

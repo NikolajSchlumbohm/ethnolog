@@ -18,9 +18,9 @@ import DocumentationButtons from "./DocumentationButtons";
 import DocumentationFilters from "./DocumentationFilters";
 import DocumentationList from "./DocumentationList";
 import DateRangeFilter from "./DateRangeFilter";
-
+import deDE from "../../../i18n/locales/de-DE";
+import { getLocaleMessages, useLocale } from "../../../i18n";
 import TagFilter from "./TagFilter";
-
 
 interface ProjektDetailProps {
   projekt: any;
@@ -56,6 +56,9 @@ export default function ProjektDetail({
   const [showNewDocumentation, setShowNewDocumentation] = useState(false);
   const [documentationType, setDocumentationType] = useState<'archiv' | 'live' | null>(null);
   const [liveDocumentationType, setLiveDocumentationType] = useState<'meeting' | 'interview' | 'fieldnote' | null>(null);
+  const { locale } = useLocale();
+  const copy = getLocaleMessages(locale).projectDetails ?? deDE.projectDetails;
+
   const [newDocumentation, setNewDocumentation] = useState<any>({
     name: '',
     beschreibung: '',
@@ -171,7 +174,7 @@ export default function ProjektDetail({
       if (error) throw error;
       setDocumentations(data || []);
     } catch (error) {
-      console.error('Fehler beim Laden der Dokumentationen:', error);
+      console.error(copy.documentationLoadConsoleError, error);
     } finally {
       setDocumentationLoading(false);
     }
@@ -188,7 +191,7 @@ export default function ProjektDetail({
 
   // Dokumentation löschen
   const handleDeleteDocumentation = async (docId: string) => {
-    if (!confirm('Möchten Sie diese Dokumentation wirklich löschen?')) return;
+    if (!confirm(copy.deleteDocumentationConfirmation)) return;
     
     try {
       const { error } = await supabase
@@ -198,11 +201,11 @@ export default function ProjektDetail({
 
       if (error) throw error;
       
-      alert('Dokumentation erfolgreich gelöscht!');
+      alert(copy.documentationSuccessfullyDeletedUserAlert);
       await loadDocumentations();
     } catch (error) {
-      console.error('Fehler beim Löschen der Dokumentation:', error);
-      alert('Fehler beim Löschen: ' + (error as any).message);
+      console.error(copy.documentationDeletationConsoleError, error);
+      alert(copy.documentationDeleteErrorUserAlert);
     }
   };
 
@@ -304,7 +307,7 @@ export default function ProjektDetail({
 
       setHasFilesInRange(hasFiles);
     } catch (error) {
-      console.error('Fehler beim Prüfen der Dateien:', error);
+      console.error(copy.fileCheckConsoleError, error);
       setHasFilesInRange(false);
     }
   };
@@ -351,7 +354,7 @@ export default function ProjektDetail({
         [projekt.id]: data || []
       });
     } catch (error) {
-      console.error('Fehler beim Laden der Projekt-Mitglieder:', error);
+      console.error(copy.projectPeopleLoadConsoleError, error);
     }
   };
 
@@ -367,18 +370,18 @@ export default function ProjektDetail({
     try {
       const { error } = await supabase.from("projekte").update({ name: newName }).eq("id", id);
       if (error) {
-        console.error('Fehler beim Speichern des Namens:', error);
-        alert('Fehler beim Speichern des Namens: ' + error.message);
+        console.error(copy.nameSaveConsoleError, error);
+        alert(copy.nameSaveUserAlert);
         return;
       }
       
       // Projekt-Objekt aktualisieren
       projekt.name = newName;
       
-      alert('Projektname erfolgreich gespeichert!');
+      alert(copy.nameSaveUserAlert);
     } catch (error) {
-      console.error('Fehler beim Speichern des Namens:', error);
-      alert('Fehler beim Speichern des Namens');
+      console.error(copy.nameSaveConsoleError, error);
+      alert(copy.nameSaveUserAlert);
     }
   }
 
@@ -386,18 +389,18 @@ export default function ProjektDetail({
     try {
       const { error } = await supabase.from("projekte").update({ beschreibung: newDesc }).eq("id", id);
       if (error) {
-        console.error('Fehler beim Speichern der Beschreibung:', error);
-        alert('Fehler beim Speichern der Beschreibung: ' + error.message);
+        console.error(copy.descriptionSaveConsoleError, error);
+        alert(copy.descriptionSaveErrorUserAlert);
         return;
       }
       
       // Projekt-Objekt aktualisieren
       projekt.beschreibung = newDesc;
       
-      alert('Projektbeschreibung erfolgreich gespeichert!');
+      alert(copy.projectDescriptionSuccessfullySavedUserAlert);
     } catch (error) {
-      console.error('Fehler beim Speichern der Beschreibung:', error);
-      alert('Fehler beim Speichern der Beschreibung');
+      console.error(copy.descriptionSaveConsoleError, error);
+      alert(copy.descriptionSaveErrorUserAlert);
     }
   }
 
@@ -427,7 +430,7 @@ export default function ProjektDetail({
       if (error) throw error;
 
       if (!docsInRange || docsInRange.length === 0) {
-        alert('Keine Dokumentationen im ausgewählten Zeitraum gefunden.');
+        alert(copy.noDocumentationInSelectedTimeframeUserAlert);
         return;
       }
 
@@ -470,7 +473,7 @@ export default function ProjektDetail({
       }
 
       if (filteredDocs.length === 0) {
-        alert('Keine Dokumentationen mit den aktuellen Filtern im ausgewählten Zeitraum gefunden.');
+        alert(copy.noDocumentationInSelectedTimeframeWithSelectedFiltersUserAlert);
         return;
       }
 
@@ -489,7 +492,7 @@ export default function ProjektDetail({
       });
 
       if (allFiles.length === 0) {
-        alert('Keine Dateien im ausgewählten Zeitraum gefunden.');
+        alert(copy.noFilesInSelectedTimeframeUserAlert);
         return;
       }
 
@@ -505,14 +508,14 @@ export default function ProjektDetail({
             .createSignedUrl(file.fileName, 3600);
 
           if (signedUrlError) {
-            console.error(`Fehler beim Generieren der Signed URL für ${file.name}:`, signedUrlError);
+            console.error(`${copy.signedUrlGenerationConsoleError} ${file.name}:`, signedUrlError);
             continue;
           }
 
           // Datei herunterladen
           const response = await fetch(signedUrlData.signedUrl);
           if (!response.ok) {
-            console.error(`Fehler beim Herunterladen von ${file.name}`);
+            console.error(`${copy.fileDownloadConsoleError} ${file.name}`);
             continue;
           }
 
@@ -527,7 +530,7 @@ export default function ProjektDetail({
           // Datei zum ZIP hinzufügen
           zip.file(zipFileName, blob);
         } catch (fileError) {
-          console.error(`Fehler bei Datei ${file.name}:`, fileError);
+          console.error(`${copy.fileConsoleError}${file.name}:`, fileError);
         }
       }
 
@@ -542,10 +545,10 @@ export default function ProjektDetail({
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
-      alert(`Erfolgreich ${allFiles.length} Dateien heruntergeladen!`);
+      alert(`${copy.fileDownloadSuccessUserAlert_1} ${allFiles.length} ${copy.fileDownloadSuccessUserAlert_2}`);
     } catch (error) {
-      console.error('Fehler beim Herunterladen der Dateien:', error);
-      alert('Fehler beim Herunterladen der Dateien. Bitte versuchen Sie es erneut.');
+      console.error(`${copy.fileDownloadConsoleError} ${error}`);
+      alert(copy.fileDownloadErroUserAlert);
     } finally {
       setDownloadingFiles(false);
     }
@@ -569,7 +572,7 @@ export default function ProjektDetail({
       if (error) throw error;
 
       if (!docsInRange || docsInRange.length === 0) {
-        alert('Keine Dokumentationen im ausgewählten Zeitraum gefunden.');
+        alert(copy.noDocumentationInSelectedTimeframeUserAlert);
         return;
       }
 
@@ -618,7 +621,7 @@ export default function ProjektDetail({
        }
 
       if (filteredDocs.length === 0) {
-        alert('Keine Dokumentationen mit den aktuellen Filtern im ausgewählten Zeitraum gefunden.');
+        alert(copy.noDocumentation);
         return;
       }
 
@@ -630,20 +633,20 @@ export default function ProjektDetail({
             .createSignedUrl(file.fileName, 3600);
 
           if (signedUrlError) {
-            console.error(`Fehler beim Generieren der Signed URL für ${file.name}:`, signedUrlError);
+            console.error(`${copy.signedUrlGenerationConsoleError} ${file.name}:`, signedUrlError);
             return null;
           }
 
           const response = await fetch(signedUrlData.signedUrl);
           if (!response.ok) {
-            console.error(`Fehler beim Herunterladen von ${file.name}`);
+            console.error(`${copy.fileDownloadConsoleError} ${file.name}`);
             return null;
           }
 
           const arrayBuffer = await response.arrayBuffer();
           return Buffer.from(arrayBuffer);
         } catch (error) {
-          console.error(`Fehler bei Bild ${file.name}:`, error);
+          console.error(`${copy.imageConsoleError}${file.name}:`, error);
           return null;
         }
       };
@@ -687,7 +690,7 @@ export default function ProjektDetail({
           children: [
             // Titel
             new Paragraph({
-              text: `Dokumentationen für Projekt: ${projekt.name}`,
+              text: `${copy.projectDocumentationLabel}: ${projekt.name}`,
               heading: HeadingLevel.HEADING_1,
               alignment: AlignmentType.CENTER,
             }),
@@ -696,7 +699,7 @@ export default function ProjektDetail({
             new Paragraph({
               children: [
                 new TextRun({
-                  text: `Zeitraum: ${new Date(startDate).toLocaleDateString('de-DE')} - ${new Date(endDate).toLocaleDateString('de-DE')}`,
+                  text: `${copy.timeframeLabel}: ${new Date(startDate).toLocaleDateString('de-DE')} - ${new Date(endDate).toLocaleDateString('de-DE')}`,
                   bold: true,
                 }),
               ],
@@ -704,7 +707,7 @@ export default function ProjektDetail({
             new Paragraph({
               children: [
                 new TextRun({
-                  text: `Exportiert am: ${new Date().toLocaleDateString('de-DE')} ${new Date().toLocaleTimeString('de-DE')}`,
+                  text: `${copy.exportedOnLabel}: ${new Date().toLocaleDateString('de-DE')} ${new Date().toLocaleTimeString('de-DE')}`,
                   bold: true,
                 }),
               ],
@@ -714,20 +717,20 @@ export default function ProjektDetail({
             // Dokumentationen
             ...processedDocs.flatMap((doc, index) => [
               new Paragraph({
-                text: `DOKUMENTATION ${index + 1}`,
+                text: `${copy.documentationLabel} ${index + 1}`,
                 heading: HeadingLevel.HEADING_2,
               }),
               
               // Grunddaten
               new Paragraph({
                 children: [
-                  new TextRun({ text: "Name: ", bold: true }),
+                  new TextRun({ text: `${copy.nameLabel}: `, bold: true }),
                   new TextRun({ text: doc.name }),
                 ],
               }),
               new Paragraph({
                 children: [
-                  new TextRun({ text: "Typ: ", bold: true }),
+                  new TextRun({ text: `${copy.typeLabel}: `, bold: true }),
                   new TextRun({ 
                     text: doc.typ === 'archiv' ? 'Archiv' : 
                           doc.untertyp === 'meeting' ? 'Meeting' :
@@ -738,14 +741,14 @@ export default function ProjektDetail({
               }),
               new Paragraph({
                 children: [
-                  new TextRun({ text: "Datum: ", bold: true }),
+                  new TextRun({ text: `${copy.dateLabel}: `, bold: true }),
                   new TextRun({ text: new Date(doc.datum).toLocaleDateString('de-DE') }),
                 ],
               }),
               ...(doc.startzeit && doc.endzeit ? [
                 new Paragraph({
                   children: [
-                    new TextRun({ text: "Zeit: ", bold: true }),
+                    new TextRun({ text: `${copy.timeLabel}: `, bold: true }),
                     new TextRun({ text: `${doc.startzeit} - ${doc.endzeit}` }),
                   ],
                 })
@@ -753,7 +756,7 @@ export default function ProjektDetail({
               ...(doc.beschreibung ? [
                 new Paragraph({
                   children: [
-                    new TextRun({ text: "Beschreibung: ", bold: true }),
+                    new TextRun({ text: `${copy.descriptionLabel}: `, bold: true }),
                     new TextRun({ text: doc.beschreibung }),
                   ],
                 })
@@ -763,7 +766,7 @@ export default function ProjektDetail({
               ...(doc.untertyp === 'meeting' && doc.meeting_typ ? [
                 new Paragraph({
                   children: [
-                    new TextRun({ text: "Meeting-Typ: ", bold: true }),
+                    new TextRun({ text: `${copy.meetingTypeLabel}: `, bold: true }),
                     new TextRun({ 
                       text: doc.meeting_typ === 'online' ? 'Online' : 
                             doc.meeting_typ === 'offline' ? 'Offline' : 'Hybrid'
@@ -774,7 +777,7 @@ export default function ProjektDetail({
               ...(doc.untertyp === 'meeting' && doc.klient ? [
                 new Paragraph({
                   children: [
-                    new TextRun({ text: "Klient: ", bold: true }),
+                    new TextRun({ text: `${copy.clientLabel}: `, bold: true }),
                     new TextRun({ text: doc.klient }),
                   ],
                 })
@@ -784,10 +787,10 @@ export default function ProjektDetail({
               ...(doc.untertyp === 'interview' && doc.interview_typ ? [
                 new Paragraph({
                   children: [
-                    new TextRun({ text: "Interview-Typ: ", bold: true }),
+                    new TextRun({ text: `${copy.interviewTypeLabel}: `, bold: true }),
                     new TextRun({ 
-                      text: doc.interview_typ === 'online' ? 'Online' : 
-                            doc.interview_typ === 'offline' ? 'Offline' : 'Hybrid'
+                      text: doc.interview_typ === 'online' ? copy.onlineLabel: 
+                            doc.interview_typ === 'offline' ? copy.offlineLabel : copy.hybridLabel
                     }),
                   ],
                 })
@@ -796,7 +799,7 @@ export default function ProjektDetail({
               // Personen
               ...(doc.personen && Array.isArray(doc.personen) && doc.personen.length > 0 ? [
                 new Paragraph({
-                  children: [new TextRun({ text: "Personen:", bold: true })],
+                  children: [new TextRun({ text: copy.personsLabel, bold: true })],
                 }),
                 ...doc.personen.map((person: any) => 
                   new Paragraph({
@@ -813,7 +816,7 @@ export default function ProjektDetail({
               // Dialoge
               ...(doc.dialoge && Array.isArray(doc.dialoge) && doc.dialoge.length > 0 ? [
                 new Paragraph({
-                  children: [new TextRun({ text: "Dialoge:", bold: true })],
+                  children: [new TextRun({ text: copy.dialogsLabel, bold: true })],
                 }),
                 ...doc.dialoge
                   .filter((dialog: any) => dialog.text)
@@ -830,21 +833,21 @@ export default function ProjektDetail({
               // Kernfragen (nur für Interviews)
               ...(doc.untertyp === 'interview' && doc.kernfragen && Array.isArray(doc.kernfragen) && doc.kernfragen.length > 0 ? [
                 new Paragraph({
-                  children: [new TextRun({ text: "Kernfragen:", bold: true })],
+                  children: [new TextRun({ text: copy.coreQuestionsLabel, bold: true })],
                 }),
                 ...doc.kernfragen
                   .filter((kernfrage: any) => kernfrage.frage)
                   .map((kernfrage: any, frageIndex: number) => [
                     new Paragraph({
                       children: [
-                        new TextRun({ text: `${frageIndex + 1}. Frage: `, bold: true }),
+                        new TextRun({ text: `${frageIndex + 1}. ${copy.questionsLabel}: `, bold: true }),
                         new TextRun({ text: kernfrage.frage }),
                       ],
                     }),
                     ...(kernfrage.antwort ? [
                       new Paragraph({
                         children: [
-                          new TextRun({ text: "   Antwort: ", bold: true }),
+                          new TextRun({ text: copy.answersLabel, bold: true }),
                           new TextRun({ text: kernfrage.antwort }),
                         ],
                       })
@@ -855,7 +858,7 @@ export default function ProjektDetail({
               // Dateien mit Bildern und Video-Verweisen
               ...(doc.processedFiles && doc.processedFiles.length > 0 ? [
                 new Paragraph({
-                  children: [new TextRun({ text: "Angehängte Dateien:", bold: true })],
+                  children: [new TextRun({ text: copy.addedFiles, bold: true })],
                 }),
                 ...doc.processedFiles.flatMap((file: any) => {
                   const paragraphs = [];
@@ -884,10 +887,10 @@ export default function ProjektDetail({
                         alignment: AlignmentType.CENTER,
                       }));
                     } catch (error) {
-                      console.error(`Fehler beim Einbetten von Bild ${file.name}:`, error);
+                      console.error(`${copy.imageEmbedConsoleError}${file.name}:`, error);
                       paragraphs.push(new Paragraph({
                         children: [
-                          new TextRun({ text: "[Bild konnte nicht eingebettet werden]", color: "FF0000" }),
+                          new TextRun({ text: copy.imageEmbedErrorTextRun, color: "FF0000" }),
                         ],
                       }));
                     }
@@ -897,8 +900,8 @@ export default function ProjektDetail({
                   if (file.type.startsWith('video/')) {
                     paragraphs.push(new Paragraph({
                       children: [
-                        new TextRun({ text: "🎥 Video-Datei: ", bold: true }),
-                        new TextRun({ text: "Diese Datei ist als Video verfügbar und kann nicht direkt angezeigt werden." }),
+                        new TextRun({ text: copy.videoFileLabel, bold: true }),
+                        new TextRun({ text: copy.videoFileNotDisplayableInfoLabel }),
                       ],
                     }));
                   }
@@ -907,8 +910,8 @@ export default function ProjektDetail({
                   if (file.type.startsWith('audio/')) {
                     paragraphs.push(new Paragraph({
                       children: [
-                        new TextRun({ text: "🎵 Audio-Datei: ", bold: true }),
-                        new TextRun({ text: "Diese Datei ist als Audio verfügbar und kann nicht direkt angezeigt werden." }),
+                        new TextRun({ text: copy.audioFile, bold: true }),
+                        new TextRun({ text: copy.audioFileNotDisplayableInfoLabel }),
                       ],
                     }));
                   }
@@ -937,10 +940,10 @@ export default function ProjektDetail({
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
-             alert(`Erfolgreich ${filteredDocs.length} Dokumentationen als Word-Dokument exportiert!`);
+             alert(`${copy.successfullyExportedDocumentationAsWordFileUserAlert_1} ${filteredDocs.length} ${copy.successfullyExportedDocumentationAsWordFileUserAlert_2}`);
     } catch (error) {
-      console.error('Fehler beim Exportieren der Dokumentationen:', error);
-      alert('Fehler beim Exportieren der Dokumentationen. Bitte versuchen Sie es erneut.');
+      console.error(copy.documentationExportConsoleError, error);
+      alert(copy.documentationExportErrorUserAlert);
     } finally {
       setExportingWord(false);
     }
@@ -964,7 +967,7 @@ export default function ProjektDetail({
        if (error) throw error;
 
        if (!docsInRange || docsInRange.length === 0) {
-         alert('Keine Dokumentationen im ausgewählten Zeitraum gefunden.');
+         alert(copy.noDocumentationInSelectedTimeframeUserAlert);
          return;
        }
 
@@ -1013,7 +1016,7 @@ export default function ProjektDetail({
        }
 
        if (filteredDocs.length === 0) {
-         alert('Keine Dokumentationen mit den aktuellen Filtern im ausgewählten Zeitraum gefunden.');
+         alert(copy.noDocumentationInSelectedTimeframeWithSelectedFiltersUserAlert);
          return;
        }
 
@@ -1025,19 +1028,19 @@ export default function ProjektDetail({
               .createSignedUrl(file.fileName, 3600);
 
             if (signedUrlError) {
-              console.error(`Fehler beim Generieren der Signed URL für ${file.name}:`, signedUrlError);
+              console.error(`${copy.signedUrlGenerationConsoleError} ${file.name}:`, signedUrlError);
               return null;
             }
 
             const response = await fetch(signedUrlData.signedUrl);
             if (!response.ok) {
-              console.error(`Fehler beim Herunterladen von ${file.name}`);
+              console.error(`${copy.fileDownloadConsoleError} ${file.name}`);
               return null;
             }
 
             return await response.arrayBuffer();
           } catch (error) {
-            console.error(`Fehler bei Bild ${file.name}:`, error);
+            console.error(`${copy.imageConsoleError} ${file.name}:`, error);
             return null;
           }
         };
@@ -1050,14 +1053,14 @@ export default function ProjektDetail({
               .createSignedUrl(file.fileName, 3600);
 
             if (signedUrlError) {
-              console.error(`Fehler beim Generieren der Signed URL für ${file.name}:`, signedUrlError);
+              console.error(`${copy.signedUrlGenerationConsoleError}${file.name}:`, signedUrlError);
               return null;
             }
 
             // Bild als Blob laden
             const response = await fetch(signedUrlData.signedUrl);
             if (!response.ok) {
-              console.error(`Fehler beim Herunterladen von ${file.name}`);
+              console.error(`${copy.fileDownloadConsoleError}${file.name}`);
               return null;
             }
 
@@ -1075,7 +1078,7 @@ export default function ProjektDetail({
               reader.readAsDataURL(blob);
             });
           } catch (error) {
-            console.error(`Fehler bei Bild ${file.name}:`, error);
+            console.error(`${copy.imageConsoleError}${file.name}:`, error);
             return null;
           }
         };
@@ -1121,7 +1124,7 @@ export default function ProjektDetail({
       // Titel
       pdf.setFontSize(18);
       pdf.setFont('helvetica', 'bold');
-      const title = `Dokumentationen für Projekt: ${projekt.name}`;
+      const title = `${copy.documentationForProject}${projekt.name}`;
       const titleWidth = pdf.getTextWidth(title);
       pdf.text(title, (210 - titleWidth) / 2, y);
       y += 15;
@@ -1129,9 +1132,9 @@ export default function ProjektDetail({
       // Metadaten
       pdf.setFontSize(12);
       pdf.setFont('helvetica', 'normal');
-      pdf.text(`Zeitraum: ${new Date(startDate).toLocaleDateString('de-DE')} - ${new Date(endDate).toLocaleDateString('de-DE')}`, 20, y);
+      pdf.text(`${copy.timeframeLabel} ${new Date(startDate).toLocaleDateString('de-DE')} - ${new Date(endDate).toLocaleDateString('de-DE')}`, 20, y);
       y += lineHeight;
-      pdf.text(`Exportiert am: ${new Date().toLocaleDateString('de-DE')} ${new Date().toLocaleTimeString('de-DE')}`, 20, y);
+      pdf.text(`${copy.exportedOnLabel} ${new Date().toLocaleDateString('de-DE')} ${new Date().toLocaleTimeString('de-DE')}`, 20, y);
       y += 15;
 
              // Dokumentationen
@@ -1145,33 +1148,33 @@ export default function ProjektDetail({
         // Dokumentationstitel
         pdf.setFontSize(14);
         pdf.setFont('helvetica', 'bold');
-        pdf.text(`DOKUMENTATION ${index + 1}`, 20, y);
+        pdf.text(`${copy.documentationParagraphLabel} ${index + 1}`, 20, y);
         y += lineHeight;
 
         // Grunddaten
         pdf.setFontSize(11);
         pdf.setFont('helvetica', 'normal');
-        pdf.text(`Name: ${doc.name}`, 20, y);
+        pdf.text(`${copy.nameLabel}: ${doc.name}`, 20, y);
         y += lineHeight;
         
         const docType = doc.typ === 'archiv' ? 'Archiv' : 
                        doc.untertyp === 'meeting' ? 'Meeting' :
                        doc.untertyp === 'interview' ? 'Interview' :
                        doc.untertyp === 'fieldnote' ? 'Feldnotiz' : 'Dokumentation';
-        pdf.text(`Typ: ${docType}`, 20, y);
+        pdf.text(`${copy.typeLabel}: ${docType}`, 20, y);
         y += lineHeight;
         
-        pdf.text(`Datum: ${new Date(doc.datum).toLocaleDateString('de-DE')}`, 20, y);
+        pdf.text(`${copy.dateLabel}: ${new Date(doc.datum).toLocaleDateString('de-DE')}`, 20, y);
         y += lineHeight;
 
         if (doc.startzeit && doc.endzeit) {
-          pdf.text(`Zeit: ${doc.startzeit} - ${doc.endzeit}`, 20, y);
+          pdf.text(`${copy.timeLabel}: ${doc.startzeit} - ${doc.endzeit}`, 20, y);
           y += lineHeight;
         }
 
         if (doc.beschreibung) {
           // Beschreibung kann lang sein, daher Zeilenumbruch
-          const descLines = pdf.splitTextToSize(`Beschreibung: ${doc.beschreibung}`, 170);
+          const descLines = pdf.splitTextToSize(`${copy.descriptionLabel}: ${doc.beschreibung}`, 170);
           pdf.text(descLines, 20, y);
           y += lineHeight * descLines.length;
         }
@@ -1181,11 +1184,11 @@ export default function ProjektDetail({
           if (doc.meeting_typ) {
             const meetingType = doc.meeting_typ === 'online' ? 'Online' : 
                                doc.meeting_typ === 'offline' ? 'Offline' : 'Hybrid';
-            pdf.text(`Meeting-Typ: ${meetingType}`, 20, y);
+            pdf.text(`${copy.meetingTypeLabel}: ${meetingType}`, 20, y);
             y += lineHeight;
           }
           if (doc.klient) {
-            pdf.text(`Klient: ${doc.klient}`, 20, y);
+            pdf.text(`${copy.clientLabel}: ${doc.klient}`, 20, y);
             y += lineHeight;
           }
         }
@@ -1194,14 +1197,14 @@ export default function ProjektDetail({
         if (doc.untertyp === 'interview' && doc.interview_typ) {
           const interviewType = doc.interview_typ === 'online' ? 'Online' : 
                                doc.interview_typ === 'offline' ? 'Offline' : 'Hybrid';
-          pdf.text(`Interview-Typ: ${interviewType}`, 20, y);
+          pdf.text(`${copy.interviewTypeLabel}: ${interviewType}`, 20, y);
           y += lineHeight;
         }
 
         // Personen
         if (doc.personen && Array.isArray(doc.personen) && doc.personen.length > 0) {
           pdf.setFont('helvetica', 'bold');
-          pdf.text('Personen:', 20, y);
+          pdf.text(copy.personsLabel, 20, y);
           y += lineHeight;
           pdf.setFont('helvetica', 'normal');
           doc.personen.forEach((person: any) => {
@@ -1217,7 +1220,7 @@ export default function ProjektDetail({
         // Dialoge
         if (doc.dialoge && Array.isArray(doc.dialoge) && doc.dialoge.length > 0) {
           pdf.setFont('helvetica', 'bold');
-          pdf.text('Dialoge:', 20, y);
+          pdf.text(copy.dialogsLabel, 20, y);
           y += lineHeight;
           pdf.setFont('helvetica', 'normal');
           doc.dialoge
@@ -1236,7 +1239,7 @@ export default function ProjektDetail({
         // Kernfragen (nur für Interviews)
         if (doc.untertyp === 'interview' && doc.kernfragen && Array.isArray(doc.kernfragen) && doc.kernfragen.length > 0) {
           pdf.setFont('helvetica', 'bold');
-          pdf.text('Kernfragen:', 20, y);
+          pdf.text(copy.coreQuestionsLabel, 20, y);
           y += lineHeight;
           pdf.setFont('helvetica', 'normal');
           doc.kernfragen
@@ -1263,7 +1266,7 @@ export default function ProjektDetail({
                  // Dateien mit Bildern und Video-Verweisen
          if (doc.processedFiles && doc.processedFiles.length > 0) {
            pdf.setFont('helvetica', 'bold');
-           pdf.text('Angehängte Dateien:', 20, y);
+           pdf.text(copy.addedFiles, 20, y);
            y += lineHeight;
            pdf.setFont('helvetica', 'normal');
            
@@ -1306,7 +1309,7 @@ export default function ProjektDetail({
                     y = 20;
                   }
                   pdf.setFont('helvetica', 'italic');
-                  pdf.text('[Bild konnte nicht eingebettet werden]', 25, y);
+                  pdf.text(copy.imageEmbedErrorTextRun, 25, y);
                   pdf.setFont('helvetica', 'normal');
                   y += lineHeight;
                 }
@@ -1319,7 +1322,7 @@ export default function ProjektDetail({
                  y = 20;
                }
                pdf.setFont('helvetica', 'bold');
-               pdf.text('🎥 Video-Datei: Diese Datei ist als Video verfügbar', 25, y);
+               pdf.text(copy.videoFileInfoLabel, 25, y);
                y += lineHeight;
                pdf.setFont('helvetica', 'normal');
              }
@@ -1331,7 +1334,7 @@ export default function ProjektDetail({
                  y = 20;
                }
                pdf.setFont('helvetica', 'bold');
-               pdf.text('🎵 Audio-Datei: Diese Datei ist als Audio verfügbar', 25, y);
+               pdf.text(copy.audioFileInfoLabel, 25, y);
                y += lineHeight;
                pdf.setFont('helvetica', 'normal');
              }
@@ -1351,10 +1354,10 @@ export default function ProjektDetail({
       // PDF speichern
       pdf.save(`dokumentationen_${startDate}_bis_${endDate}.pdf`);
 
-             alert(`Erfolgreich ${filteredDocs.length} Dokumentationen als PDF exportiert!`);
+             alert(`${copy.successfullyExportedDocumentationAsPDFFileUserAlert_1} ${filteredDocs.length} ${copy.successfullyExportedDocumentationAsPDFFileUserAlert_2}`);
     } catch (error) {
-      console.error('Fehler beim PDF-Export:', error);
-      alert('Fehler beim PDF-Export. Bitte versuchen Sie es erneut.');
+      console.error(copy.PdfExportConsoleError, error);
+      alert(copy.PdfExportErrorUserAlert);
     } finally {
       setExportingPDF(false);
     }
@@ -1407,21 +1410,21 @@ export default function ProjektDetail({
       }
 
       if (error) {
-        console.error('Fehler beim Speichern der Dokumentation:', error);
-        alert('Fehler beim Speichern: ' + error.message);
+        console.error(copy.documentationSaveConsoleError, error);
+        alert(copy.documentationSaveErrorUserAlert);
       } else {
         setShowNewDocumentation(false);
         setDocumentationType(null);
         setLiveDocumentationType(null);
         setEditingDocumentation(null);
         setNewDocumentation({});
-        alert(editingDocumentation ? 'Dokumentation erfolgreich aktualisiert!' : 'Dokumentation erfolgreich gespeichert!');
+        alert(editingDocumentation ? copy.documentationSuccessfullyUpdatedUserAlert : copy.documentationSuccessfullySavedUserAlert);
         // Dokumentationen neu laden
         await loadDocumentations();
       }
     } catch (error) {
-      console.error('Fehler beim Speichern der Dokumentation:', error);
-      alert('Fehler beim Speichern der Dokumentation');
+      console.error(copy.documentationSaveConsoleError, error);
+      alert(copy.documentationSaveErrorUserAlert);
     }
   }
 
@@ -1547,8 +1550,8 @@ export default function ProjektDetail({
                            fontStyle: 'italic'
                          }}>
                            {useDateRange && startDate && endDate ? 
-                             `Keine Dokumentationen im Zeitraum ${new Date(startDate).toLocaleDateString('de-DE')} - ${new Date(endDate).toLocaleDateString('de-DE')}` :
-                             `Keine Dokumentationen für ${new Date(selectedDate).toLocaleDateString('de-DE')}`
+                             `${copy.noDocumentationForTimeframe}${new Date(startDate).toLocaleDateString('de-DE')} - ${new Date(endDate).toLocaleDateString('de-DE')}` :
+                             `${copy.noDocumentationForDate}${new Date(selectedDate).toLocaleDateString('de-DE')}`
                            }
                          </div>
                        )}
