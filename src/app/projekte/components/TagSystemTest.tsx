@@ -1,38 +1,53 @@
 "use client";
-import React, { useState } from 'react';
+import React, {useEffect, useState } from 'react';
 import TagInput from './TagInput';
+import deDE from "../../../i18n/locales/de-DE";
+import {
+  defaultLocale,
+  getLocaleFromValue,
+  localeLabels,
+  locales,
+  localeChangeEventName,
+  type LocaleCode,
+  getLocaleMessages,
+  useLocale
+} from "../../../i18n";
+
 
 export default function TagSystemTest() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [locale, setLocale] = useState<LocaleCode>(defaultLocale);
+   
+  const copy = getLocaleMessages(locale).tagSystemTest ?? deDE.tagSystemTest;
 
   return (
     <div style={{ padding: 20, maxWidth: 600, margin: '0 auto' }}>
-      <h2>Tag-System Test</h2>
-      <p>Testen Sie das neue Tag-System mit Dropdown-Vorschlägen und der Möglichkeit, neue Tags zu erstellen.</p>
+      <h2>{copy.title}</h2>
+      <p>{copy.tagInfoLabel}</p>
       
       <div style={{ marginBottom: 20 }}>
-        <h3>Verfügbare Tags:</h3>
-        <p>Die folgenden Tags sind standardmäßig verfügbar:</p>
+        <h3>{copy.availableTagsLabel}</h3>
+        <p>{copy.standardTagsInfoLabel}</p>
         <ul>
-          <li><strong>formell</strong> - Für formelle Dokumentationen</li>
-          <li><strong>informell</strong> - Für informelle Dokumentationen</li>
-          <li><strong>extern</strong> - Für externe Dokumentationen</li>
+          <li><strong>{copy.formalTagTypeLabel}</strong>{copy.formalInfoLabel}</li>
+          <li><strong>{copy.informalTagTypeLabel}</strong>{copy.informalInfoLabel}</li>
+          <li><strong>{copy.externalTagTypeLabel}</strong>{copy.externalInfoLabel}</li>
         </ul>
       </div>
 
       <div style={{ marginBottom: 20 }}>
-        <h3>Tag-Eingabe:</h3>
+        <h3>{copy.enterTagLabel}</h3>
         <TagInput
           selectedTags={selectedTags}
           onTagsChange={setSelectedTags}
-          placeholder="Tippen Sie, um Tags zu suchen oder neue zu erstellen..."
+          placeholder={copy.clickToSearchOrCreateTagLabel}
         />
       </div>
 
       <div style={{ marginBottom: 20 }}>
-        <h3>Ausgewählte Tags:</h3>
+        <h3>{copy.selectedTagsLabel}</h3>
         {selectedTags.length === 0 ? (
-          <p style={{ color: 'var(--text-muted)' }}>Noch keine Tags ausgewählt</p>
+          <p style={{ color: 'var(--text-muted)' }}>{copy.noTagsSelectedLabel}</p>
         ) : (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {selectedTags.map((tag, index) => (
@@ -60,12 +75,12 @@ export default function TagSystemTest() {
         borderRadius: 8, 
         border: '1px solid var(--border)' 
       }}>
-        <h3>Anleitung:</h3>
+        <h3>{copy.instructionsHeader}</h3>
         <ol style={{ margin: 0, paddingLeft: 20 }}>
-          <li>Tippen Sie in das Eingabefeld, um verfügbare Tags zu sehen</li>
-          <li>Wählen Sie aus den Vorschlägen oder erstellen Sie einen neuen Tag</li>
-          <li>Drücken Sie Enter oder klicken Sie auf "+" um Tags hinzuzufügen</li>
-          <li>Klicken Sie auf "×" um Tags zu entfernen</li>
+          <li>{copy.availableTagsInstruction}</li>
+          <li>{copy.chooseOrCreateTagInstruction}</li>
+          <li>{copy.addTagInstruction}</li>
+          <li>{copy.removeTagInstruction}</li>
         </ol>
       </div>
     </div>

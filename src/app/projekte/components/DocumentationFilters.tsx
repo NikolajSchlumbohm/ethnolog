@@ -1,6 +1,10 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 
+import { getLocaleMessages, useLocale } from '../../../i18n';
+import  deDE from '../../../i18n/locales/de-DE';
+
+
 interface DocumentationFiltersProps {
   documentations: any[];
   activeDocumentationFilters: string[];
@@ -24,6 +28,10 @@ export default function DocumentationFilters({
   exportingWord = false,
   exportingPDF = false
 }: DocumentationFiltersProps) {
+  const { locale } = useLocale();
+  const copy = getLocaleMessages(locale).documentationFilter ?? deDE.documentationFilter;
+
+
   const [showAll, setShowAll] = useState(activeDocumentationFilters.length === 0);
   const [showExportDropdown, setShowExportDropdown] = useState(false);
 
@@ -98,7 +106,7 @@ export default function DocumentationFilters({
             fontWeight: 600,
             fontSize: 12
           }}>
-            Archiv ({documentations.filter(d => d.typ === 'archiv').length})
+            {copy.documentationTypeButtonArchiveDocumentation} ({documentations.filter(d => d.typ === 'archiv').length})
           </span>
         </label>
       )}
@@ -121,7 +129,7 @@ export default function DocumentationFilters({
             fontWeight: 600,
             fontSize: 12
           }}>
-            📅 Meeting ({documentations.filter(d => d.untertyp === 'meeting').length})
+            📅 {copy.documentationTypeButtonMeeting} ({documentations.filter(d => d.untertyp === 'meeting').length})
           </span>
         </label>
       )}
@@ -144,7 +152,7 @@ export default function DocumentationFilters({
             fontWeight: 600,
             fontSize: 12
           }}>
-            🎤 Interview ({documentations.filter(d => d.untertyp === 'interview').length})
+            🎤 {copy.documentationTypeButtonInterview} ({documentations.filter(d => d.untertyp === 'interview').length})
           </span>
         </label>
       )}
@@ -167,7 +175,7 @@ export default function DocumentationFilters({
             fontWeight: 600,
             fontSize: 12
           }}>
-            📝 Feldnotiz ({documentations.filter(d => d.untertyp === 'fieldnote').length})
+            📝 {copy.documentationTypeButtonFieldNote} ({documentations.filter(d => d.untertyp === 'fieldnote').length})
           </span>
         </label>
       )}
@@ -180,7 +188,7 @@ export default function DocumentationFilters({
           color: 'var(--text-primary)',
           whiteSpace: 'nowrap'
         }}>
-          Status:
+          {copy.statusLabel}
         </label>
         <select
           value={statusFilter}
@@ -196,9 +204,9 @@ export default function DocumentationFilters({
             cursor: 'pointer'
           }}
         >
-          <option value="alle">Alle ({documentations.length})</option>
-          <option value="unfertig">Unfertig ({documentations.filter(d => d.status === 'unfertig' || !d.status).length})</option>
-          <option value="fertig">Fertig ({documentations.filter(d => d.status === 'fertig').length})</option>
+          <option value="alle">{copy.statusAllDropdownOption} ({documentations.length})</option>
+          <option value="unfertig">{copy.statusIncompleteDropdownOption} ({documentations.filter(d => d.status === 'unfertig' || !d.status).length})</option>
+          <option value="fertig">{copy.statusCompleteDropdownOption} ({documentations.filter(d => d.status === 'fertig').length})</option>
         </select>
       </div>
 
@@ -224,7 +232,7 @@ export default function DocumentationFilters({
             }}
           >
             <span style={{ fontSize: 14 }}>📤</span>
-            Exportieren
+            {copy.exportLabel}
             <span style={{ fontSize: 10, marginLeft: 2 }}>
               {showExportDropdown ? '▲' : '▼'}
             </span>
@@ -278,12 +286,12 @@ export default function DocumentationFilters({
                   {exportingWord ? (
                     <>
                       <span style={{ fontSize: 14 }}>⏳</span>
-                      Exportiere Word...
+                      {copy.exportingWordLabel}
                     </>
                   ) : (
                     <>
                       <span style={{ fontSize: 14 }}>📄</span>
-                      Word exportieren
+                      {copy.exportWordDropdownOption}
                     </>
                   )}
                 </button>
@@ -322,12 +330,12 @@ export default function DocumentationFilters({
                   {exportingPDF ? (
                     <>
                       <span style={{ fontSize: 14 }}>⏳</span>
-                      Exportiere PDF...
+                      {copy.exportingPDFLabel}
                     </>
                   ) : (
                     <>
                       <span style={{ fontSize: 14 }}>📄</span>
-                      PDF exportieren
+                      {copy.exportPDFDropdownOption}
                     </>
                   )}
                 </button>

@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-
+import deDE from "../../../i18n/locales/de-DE";
+import { getLocaleMessages, useLocale } from '../../../i18n';
 interface DateRangeFilterProps {
   startDate: string;
   endDate: string;
@@ -28,6 +29,8 @@ export default function DateRangeFilter({
 }: DateRangeFilterProps) {
   const [showStartCalendar, setShowStartCalendar] = useState(false);
   const [showEndCalendar, setShowEndCalendar] = useState(false);
+  const { locale } = useLocale();
+  const copy = getLocaleMessages(locale).dateRangeFilter  ?? deDE.dateRangeFilter;
 
   // Funktion für gesamten Projektzeitraum
   const handleFullProjectRange = () => {
@@ -146,7 +149,7 @@ export default function DateRangeFilter({
             fontWeight: 600,
             color: isDarkMode ? '#e2e8f0' : '#495057'
           }}>
-            {monthNames[displayMonth.getMonth()]} {displayMonth.getFullYear()}
+            {copy.monthnames[displayMonth.getMonth()]} {displayMonth.getFullYear()}
           </span>
           <button
             onClick={() => setDisplayMonth(new Date(displayMonth.getFullYear(), displayMonth.getMonth() + 1))}
@@ -259,7 +262,7 @@ export default function DateRangeFilter({
               e.currentTarget.style.backgroundColor = 'transparent';
             }}
           >
-            Heute
+            {copy.shortCutTodayButton}
           </button>
           <button
             onClick={onClose}
@@ -279,7 +282,7 @@ export default function DateRangeFilter({
               e.currentTarget.style.backgroundColor = 'transparent';
             }}
           >
-            Schließen
+            {copy.closeCalenderButton}
           </button>
         </div>
       </div>
@@ -299,7 +302,7 @@ export default function DateRangeFilter({
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, position: 'relative' }}>
         <label style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
-          Von:
+          {copy.fromLabel}
         </label>
         <input
           type="date"
@@ -327,7 +330,7 @@ export default function DateRangeFilter({
             fontSize: 14,
             marginLeft: 4
           }}
-          title="Kalender öffnen"
+          title = {copy.calenderTooltipTitle}
         >
           📅
         </button>
@@ -341,7 +344,7 @@ export default function DateRangeFilter({
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, position: 'relative' }}>
         <label style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
-          Bis:
+          {copy.untilLabel}
         </label>
         <input
           type="date"
@@ -398,10 +401,10 @@ export default function DateRangeFilter({
             alignItems: 'center',
             gap: 6
           }}
-          title="Gesamten Projektzeitraum (von Projekterstellung bis heute) auswählen"
+          title={copy.fullTimeframeTooltipTitle}
         >
           <span style={{ fontSize: 16 }}>📊</span>
-          Gesamter Zeitraum
+          {copy.fullTimeframeButton }
         </button>
       )}
 
@@ -419,7 +422,7 @@ export default function DateRangeFilter({
           transition: 'all 0.2s ease'
         }}
       >
-        Zurücksetzen
+        {copy.resetButton}
       </button>
     </div>
   );

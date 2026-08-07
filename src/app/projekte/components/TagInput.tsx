@@ -1,21 +1,29 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../supabaseClient';
+import { getLocaleMessages, useLocale } from "../../../i18n";
+import deDE from "../../../i18n/locales/de-DE";
+
 
 interface TagInputProps {
+ 
+
   selectedTags: string[];
   onTagsChange: (tags: string[]) => void;
   placeholder?: string;
 }
 
-export default function TagInput({ selectedTags, onTagsChange, placeholder = "Tag eingeben..." }: TagInputProps) {
+export default function TagInput({ selectedTags, onTagsChange, placeholder = "" }: TagInputProps) {
   const [inputValue, setInputValue] = useState('');
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [filteredTags, setFilteredTags] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
+  const { locale } = useLocale();
+  const copy = getLocaleMessages(locale).tagInput ?? deDE.tagInput;
+  placeholder = copy.enterTagPlaceholder;
+  
   // Lade verfügbare Tags aus der Datenbank
   useEffect(() => {
     loadAvailableTags();
@@ -34,19 +42,19 @@ export default function TagInput({ selectedTags, onTagsChange, placeholder = "Ta
         .order('name');
 
       if (error) {
-        console.error('Fehler beim Laden der Tags:', error);
+        console.error(copy.tagLoadConsoleError, error);
         return;
       }
 
       const tags = data?.map(tag => tag.name) || [];
       setAvailableTags(tags);
     } catch (error) {
-      console.error('Fehler beim Laden der Tags:', error);
+      console.error(copy.tagLoadConsoleError, error);
     }
   };
 
   const initializeDefaultTags = async () => {
-    const defaultTags = ['formell', 'informell', 'extern'];
+    const defaultTags = [copy.formalFormalityType, copy.informalFormalityType, copy.externalFormalityType];
     
     try {
       // Prüfe, ob die Tags bereits existieren
@@ -65,14 +73,14 @@ export default function TagInput({ selectedTags, onTagsChange, placeholder = "Ta
           .insert(missingTags.map(name => ({ name })));
 
         if (error) {
-          console.error('Fehler beim Hinzufügen der Standard-Tags:', error);
+          console.error(copy.standardTagAddConsoleError, error);
         } else {
           // Lade Tags neu
           loadAvailableTags();
         }
       }
     } catch (error) {
-      console.error('Fehler beim Initialisieren der Standard-Tags:', error);
+      console.error(copy.standardTagInitializationConsoleError, error);
     }
   };
 
@@ -83,7 +91,7 @@ export default function TagInput({ selectedTags, onTagsChange, placeholder = "Ta
         .insert({ name: tagName });
 
       if (error) {
-        console.error('Fehler beim Hinzufügen des Tags zur Datenbank:', error);
+        console.error(copy.tagSaveDatabaseConsoleError, error);
         return false;
       }
 
@@ -91,7 +99,7 @@ export default function TagInput({ selectedTags, onTagsChange, placeholder = "Ta
       setAvailableTags(prev => [...prev, tagName].sort());
       return true;
     } catch (error) {
-      console.error('Fehler beim Hinzufügen des Tags:', error);
+      console.error(copy.tagAddConsoleError, error);
       return false;
     }
   };
@@ -124,7 +132,7 @@ export default function TagInput({ selectedTags, onTagsChange, placeholder = "Ta
     if (!availableTags.includes(tag)) {
       const success = await addTagToDatabase(tag);
       if (!success) {
-        alert('Fehler beim Hinzufügen des neuen Tags. Bitte versuchen Sie es erneut.');
+        alert(copy.tagAddUserAlert);
         return;
       }
     }
@@ -263,7 +271,7 @@ export default function TagInput({ selectedTags, onTagsChange, placeholder = "Ta
                     background: 'var(--surface-hover)'
                   }}
                 >
-                  + Neuen Tag "{inputValue.trim()}" erstellen
+                  {copy.addTagLabel.replace('{{tagtrim}}', inputValue.trim())}
                 </div>
               )}
             </div>
@@ -331,5 +339,5 @@ export default function TagInput({ selectedTags, onTagsChange, placeholder = "Ta
         </div>
       )}
     </div>
-  );
+  );  
 }

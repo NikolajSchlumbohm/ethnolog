@@ -1,6 +1,8 @@
 "use client";
 import React from 'react';
 import SecureFileDisplay from './SecureFileDisplay';
+import { getLocaleMessages, useLocale } from '../../../i18n';
+import deDE from '../../../i18n/locales/de-DE';
 
 interface DocumentationListProps {
   documentations: any[];
@@ -31,6 +33,10 @@ export default function DocumentationList({
   selectedTags,
   statusFilter
 }: DocumentationListProps) {
+
+  const { locale } = useLocale();
+  const copy = getLocaleMessages(locale).documentationList  ?? deDE.documentationList;
+
   const filteredDocumentations = documentations.filter(doc => {
     // Status-Filter immer anwenden (unabhängig von "Alle")
     const docStatus = doc.status || 'unfertig';
@@ -62,7 +68,7 @@ export default function DocumentationList({
     // Wenn keine Typ-Filter aktiv sind, zeige alle passenden Dokumentationen (Status-Filter wurde bereits geprüft)
     const hasTypeFilters = isArchivSelected || isLiveTypeSelected;
     const passesTypeFilter = !hasTypeFilters || (isArchivSelected && isArchivDoc) || (isLiveTypeSelected && isLiveDoc);
-    
+
     // Tag-Filter prüfen
     if (selectedTags.length === 0) {
       return passesTypeFilter;
@@ -120,7 +126,7 @@ export default function DocumentationList({
             style={{ cursor: 'pointer' }}
           />
           <span>
-            {allFilteredSelected ? 'Alle abwählen' : 'Alle auswählen'} 
+            {allFilteredSelected ? copy.deselectAllLabel : copy.selectAllLabel} 
             ({selectedDocumentations.length} von {filteredDocumentations.length} ausgewählt)
           </span>
         </div>
@@ -166,7 +172,7 @@ export default function DocumentationList({
                 flexShrink: 0,
                 transition: 'transform 0.2s ease'
               }}
-              title={expandedDocumentations[doc.id] ? 'Einklappen' : 'Ausklappen'}
+              title={expandedDocumentations[doc.id] ? copy.collapseLabel : copy.expandLabel}
             >
               {expandedDocumentations[doc.id] ? '▼' : '►'}
             </button>
@@ -180,10 +186,10 @@ export default function DocumentationList({
                   </h3>
                   <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     <span>
-                      {doc.typ === 'archiv' ? 'Archiv' : 
-                       doc.untertyp === 'meeting' ? 'Meeting' :
-                       doc.untertyp === 'interview' ? 'Interview' :
-                       doc.untertyp === 'fieldnote' ? 'Feldnotiz' : 'Dokumentation'}
+                      {doc.typ === 'archiv' ? copy.archiveLabel : 
+                       doc.untertyp === 'meeting' ? copy.meetingLabel :
+                       doc.untertyp === 'interview' ? copy.interviewLabel :
+                       doc.untertyp === 'fieldnote' ? copy.fieldNoteLabel : copy.documentationLabel}
                     </span>
                     <span>•</span>
                     <span>{new Date(doc.datum).toLocaleDateString('de-DE')}</span>
@@ -202,7 +208,7 @@ export default function DocumentationList({
                       background: (doc.status || 'unfertig') === 'fertig' ? 'var(--success)' : 'var(--warning)',
                       color: 'white'
                     }}>
-                      {(doc.status || 'unfertig') === 'fertig' ? '✅ Fertig' : '⏳ Unfertig'}
+                      {(doc.status || 'unfertig') === 'fertig' ? copy.completeOption : copy.incompleteOption}
                     </span>
                   </div>
                   
@@ -242,7 +248,7 @@ export default function DocumentationList({
                       transition: 'all 0.2s ease'
                     }}
                   >
-                    Bearbeiten
+                    {copy.editLabel}
                   </button>
                   
                   <button
@@ -257,7 +263,7 @@ export default function DocumentationList({
                       color: 'white'
                     }}
                   >
-                    Löschen
+                    {copy.deleteLabel}
                   </button>
                 </div>
               </div>
@@ -269,7 +275,7 @@ export default function DocumentationList({
             <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)', paddingLeft: 60 }}>
                 {doc.beschreibung && (
                   <div style={{ marginBottom: 12 }}>
-                    <strong>Beschreibung:</strong> {doc.beschreibung}
+                    <strong>{copy.descriptionLabel}</strong> {doc.beschreibung}
                   </div>
                 )}
 
@@ -298,7 +304,7 @@ export default function DocumentationList({
 
                 {doc.personen && Array.isArray(doc.personen) && doc.personen.length > 0 && (
                   <div style={{ marginBottom: 12 }}>
-                    <strong>Personen:</strong>
+                    <strong>{copy.personsLabel}</strong>
                     <ul style={{ margin: '4px 0', paddingLeft: 20 }}>
                       {doc.personen.map((person: any, index: number) => (
                         <li key={index}>
@@ -324,7 +330,7 @@ export default function DocumentationList({
 
                 {doc.kernfragen && Array.isArray(doc.kernfragen) && doc.kernfragen.length > 0 && (
                   <div style={{ marginBottom: 12 }}>
-                    <strong>Kernfragen:</strong>
+                    <strong>{copy.coreQuestionsLabel}</strong>
                     <ul style={{ margin: '4px 0', paddingLeft: 20 }}>
                       {doc.kernfragen
                         .filter((kernfrage: any) => kernfrage.frage)
@@ -333,7 +339,7 @@ export default function DocumentationList({
                             <strong>Frage:</strong> {kernfrage.frage}
                             {kernfrage.antwort && (
                               <div style={{ marginLeft: 16, marginTop: 4 }}>
-                                <strong>Antwort:</strong> {kernfrage.antwort}
+                                <strong>{copy.answerLabel}</strong> {kernfrage.antwort}
                               </div>
                             )}
                           </li>
@@ -344,7 +350,7 @@ export default function DocumentationList({
 
                                  {doc.dateien && Array.isArray(doc.dateien) && doc.dateien.length > 0 && (
                    <div>
-                     <strong>Angehängte Dateien:</strong>
+                     <strong>{copy.attachedFilesLabel}</strong>
                      <div style={{ marginTop: 8 }}>
                        {doc.dateien.map((file: any, index: number) => (
                          <SecureFileDisplay key={index} file={file} />

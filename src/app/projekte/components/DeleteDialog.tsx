@@ -1,5 +1,6 @@
 import React from 'react';
-
+import { getLocaleMessages, useLocale } from '../../../i18n';
+import  deDE from '../../../i18n/locales/de-DE';
 interface DeleteDialogProps {
   isOpen: boolean;
   title: string;
@@ -21,8 +22,11 @@ export default function DeleteDialog({
   cancelText = "Abbrechen",
   loading = false
 }: DeleteDialogProps) {
+  const { locale } = useLocale();
+  const copy = getLocaleMessages(locale).deleteDialog ?? deDE.deleteDialog;
   if (!isOpen) return null;
-
+  confirmText = copy.confirmText;
+  cancelText = copy.cancelText;
   return (
     <div style={{ 
       position: 'fixed', 
@@ -95,7 +99,7 @@ export default function DeleteDialog({
             marginTop: 8 
           }}
         >
-          Abbrechen
+          {copy.cancelText}
         </button>
       </div>
     </div>

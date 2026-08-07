@@ -1,6 +1,11 @@
 "use client";
 import React from 'react';
 
+import { getLocaleMessages, useLocale } from '../../../i18n';
+import  deDE from '../../../i18n/locales/de-DE';
+
+
+
 interface DocumentationButtonsProps {
   onLiveClick: () => void;
 }
@@ -8,6 +13,9 @@ interface DocumentationButtonsProps {
 export default function DocumentationButtons({
   onLiveClick
 }: DocumentationButtonsProps) {
+  const { locale } = useLocale();
+  const copy = getLocaleMessages(locale).documentationButtons ?? deDE.documentationButtons;
+
   return (
     <div style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
       <button
@@ -28,7 +36,7 @@ export default function DocumentationButtons({
         }}
       >
         <span style={{ fontSize: 16 }}>+</span>
-        Dokumentation
+        {copy.documentationLabel}
       </button>
     </div>
   );

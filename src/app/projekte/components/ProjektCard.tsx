@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { getLocaleMessages, useLocale } from '../../../i18n';
+import  deDE from '../../../i18n/locales/de-DE';
 
 interface ProjektCardProps {
   projekt: any;
@@ -18,6 +20,8 @@ export default function ProjektCard({
   loading 
 }: ProjektCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const { locale } = useLocale();
+  const copy = getLocaleMessages(locale).projectCard ?? deDE.projectCard;
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Verhindere Ausklappen wenn auf den Namen oder Löschen-Button geklickt wird
@@ -96,7 +100,7 @@ export default function ProjektCard({
               }}
               disabled={loading}
             >
-              Löschen
+              {copy.deleteButtonLabel}
             </button>
           )}
         </div>
@@ -126,25 +130,25 @@ export default function ProjektCard({
           lineHeight: '1.5'
         }}>
           <div style={{ marginBottom: 4 }}>
-            <strong>Erstellt:</strong> {projekt.created_at ? new Date(projekt.created_at).toLocaleString('de-DE') : "-"}
+            <strong>{copy.createdLabel}</strong> {projekt.created_at ? new Date(projekt.created_at).toLocaleString('de-DE') : "-"}
           </div>
           {projekt.updated_at && (
             <div style={{ marginBottom: 4 }}>
-              <strong>Letzte Änderung:</strong> {new Date(projekt.updated_at).toLocaleString('de-DE')}
+              <strong>{copy.lastChangeLabel}</strong> {new Date(projekt.updated_at).toLocaleString('de-DE')}
             </div>
           )}
           {projekt.arbeitsweise && (
             <div style={{ marginBottom: 4 }}>
-              <strong>Arbeitsweise:</strong> {projekt.arbeitsweise === 'vor_ort' ? 'Vor Ort' : projekt.arbeitsweise === 'hybrid' ? 'Hybrid' : 'Nur remote'}
+              <strong>{copy.workingMethodLabel}</strong> {projekt.arbeitsweise === 'vor_ort' ? copy.onLocationLabel : projekt.arbeitsweise === 'hybrid' ? copy.hybridLabel : copy.remoteLabel}
             </div>
           )}
           {projekt.optionen && Array.isArray(projekt.optionen) && projekt.optionen.length > 0 && (
             <div style={{ marginBottom: 4 }}>
-              <strong>Optionen:</strong> {projekt.optionen.join(', ')}
+              <strong>{copy.optionsLabel}</strong> {projekt.optionen.join(', ')}
             </div>
           )}
           <div style={{ marginTop: 8, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            Klicken Sie auf den Projektnamen, um zur Detailansicht zu gelangen
+            {copy.clickNameForDetails}
           </div>
         </div>
       )}
@@ -160,10 +164,10 @@ export default function ProjektCard({
           alignItems: 'center'
         }}>
           <span>
-            Erstellt: {projekt.created_at ? new Date(projekt.created_at).toLocaleDateString('de-DE') : "-"}
+            {copy.createdLabel} {projekt.created_at ? new Date(projekt.created_at).toLocaleDateString('de-DE') : "-"}
           </span>
           <span style={{ fontSize: '0.8rem' }}>
-            Klicken zum Ausklappen
+            {copy.clickToExpand}
           </span>
         </div>
       )}
