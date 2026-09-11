@@ -1,8 +1,17 @@
-to do:
--Dokumentationen Tags hinzufügen - um nach diesen filtern zu können
--Dokus zusammen strukturiert downloaden können
--Leitfaden auf der Seite
-  -Verschiedene Interviews erklären
+ToDo (Übersetzung):
+
+- [x] i18n-Wiring
+- [x] Englische Übersetzung
+- [ ] eventuell weitere Lokalisierungen
+
+
+ToDo (ursprüngliches Ethnolog-Projekt):
+
+- Dokumentationen Tags hinzufügen um nach diesen filtern zu können
+- Dokus zusammen strukturiert downloaden können
+- Leitfaden auf der Seite
+- Verschiedene Interviews erklären
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
