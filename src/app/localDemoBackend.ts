@@ -13,11 +13,11 @@ type LocalAuthUser = {
   app_metadata: Record<string, string>;
 };
 
-type LocalTableName = "projekte" | "projekt_user" | "personen" | "documentation" | "user_emails";
+type LocalTableName = "projekte" | "projekt_user" | "personen" | "documentation" | "user_emails" ;
 
 type LocalStore = {
   users: LocalUserRecord[];
-  tables: Record<Exclude<LocalTableName, "user_emails">, any[]>;
+  tables: Record<Exclude<LocalTableName, "user_emails" | "storage">, any[]>;
   storage: Record<string, Record<string, { name: string; fileName: string; type: string; size: number; dataUrl: string }>>;
 };
 
@@ -157,15 +157,15 @@ function createSeedStore(): LocalStore {
           updated_at: new Date().toISOString(),
         },
       ],
-      storage: {
-        "documentation-files": {
-          [demoImageName]: {
-            name: "demo-image.svg",
-            fileName: demoImageName,
-            type: "image/svg+xml",
-            size: demoImageDataUrl.length,
-            dataUrl: demoImageDataUrl,
-          },
+    },
+    storage: {
+      "documentation-files": {
+        [demoImageName]: {
+          name: "demo-image.svg",
+          fileName: demoImageName,
+          type: "image/svg+xml",
+          size: demoImageDataUrl.length,
+          dataUrl: demoImageDataUrl,
         },
       },
     },
@@ -188,6 +188,18 @@ function loadStore(): LocalStore {
 
   try {
     const store = JSON.parse(rawStore) as LocalStore;
+    const legacyTables = store.tables as Record<string, unknown>;
+    const legacyStorage = legacyTables.storage;
+
+    if (!store.storage || typeof store.storage !== "object" || Array.isArray(store.storage)) {
+      store.storage = legacyStorage && typeof legacyStorage === "object" && !Array.isArray(legacyStorage)
+        ? legacyStorage as LocalStore["storage"]
+        : {};
+    }
+
+    if ("storage" in legacyTables) {
+      delete legacyTables.storage;
+    }
 
     if (rawAuth) {
       try {

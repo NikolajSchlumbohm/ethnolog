@@ -140,6 +140,7 @@ const deDE = {
 	},
 	deleteProjectDialog: {
 		deleteProjectTitle: "Projekt wirklich löschen? ",
+		deleteProjectMessage: "Do you really want to delete this project?",
 		deleteProjectMessage_1: "Möchtest du das Projekt ",
 		deleteProjectMessage_2: " wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
 	},
@@ -222,6 +223,7 @@ const deDE = {
 		instructinonsText_5: "Führen Sie das Skript im SQL Editor aus",
 		emailNotFoundLabel: "E-Mail nicht verfügbar (ID: {member.user_id.substring(0, 8)}...)",
 		emailNotFoundShortLabel: "E-Mail nicht verfügbar",
+		addMemberButtonLabel: "Mitglied hinzufügen",
 	},
 	projectCard: {
 		deleteButtonLabel: "Löschen",
@@ -335,6 +337,11 @@ const deDE = {
 		uploadedFilesLabel: "Hochgeladene Dateien:",
 		cancelButton: "Abbrechen",
 		saveButton: "Speichern",
+		liveDocumentationTypeNotesLabel: "Notizen",
+		liveDocumentationTypeDescriptionLabel: "Beschreibung",
+		addMemberLabel: "Mitglied hinzufügen",
+		statusLabel: "Status",
+
 	},
 	tagFilter: {
 		header: "Nach Tags filtern",
@@ -343,6 +350,7 @@ const deDE = {
 		filteredUsingLabel: "Gefiltert nach: ",
 	},
 	projectInfoCard: {
+		descriptionLabel: "Beschreibung: ",
 		enterNameUserAlert:"Bitte geben Sie einen Namen ein.",
 		nameSaveConsoleError: "Fehler beim Speichern des Namens: ",
 		descriptionSaveConsoleError: "Fehler beim Speichern der Beschreibung: ",
@@ -377,6 +385,7 @@ const deDE = {
 		deleteDocumentationConfirmation: "Möchten Sie diese Dokumentation wirklich löschen?",
 		documentationDeletationConsoleError: "Fehler beim Löschen der Dokumentation: ",
 		documentationDeleteErrorUserAlert: "Fehler beim Löschen der Dokumentation: ",
+		documentationDeletedUserAlert: "Dokumentation erfolgreich gelöscht!",
 		documentationSuccessfullyDeletedUserAlert: "Dokumentation erfolgreich gelöscht!",
 		//eventuell archiv meeting invterview etc ändern
 		fileCheckConsoleError: "Fehler beim Prüfen der Dateien: ",

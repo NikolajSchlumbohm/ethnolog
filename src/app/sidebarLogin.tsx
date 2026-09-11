@@ -107,14 +107,14 @@ export default function SidebarLogin() {
       <input
         type="email"
         placeholder={copy.emailPlaceholder}
-        value={email}
+        defaultValue={email}
         onChange={e => setEmail(e.target.value)}
         required
       />
       <input
         type="password"
         placeholder={copy.passwordPlaceholder}
-        value={password}
+        defaultValue={password}
         onChange={e => setPassword(e.target.value)}
         required
       />

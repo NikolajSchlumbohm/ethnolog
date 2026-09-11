@@ -180,7 +180,8 @@ const enGB: LocaleMessages = {
 		registerSuccess: "Registration successful! Please confirm your email.",
 	},
 	
-		projectInfoCard: {
+	projectInfoCard: {
+		descriptionLabel: "Description: ",
 		enterNameUserAlert:"Please enter a name.",
 		nameSaveConsoleError: "Error saving name: ",
 		descriptionSaveConsoleError: "Error saving description: ",
@@ -488,6 +489,7 @@ const enGB: LocaleMessages = {
 		instructinonsText_5: "Run the script in the SQL Editor",
 		emailNotFoundLabel: "Email not available (ID: {member.user_id.substring(0, 8)}...)",
 		emailNotFoundShortLabel: "Email not available",
+		addMemberButtonLabel: "Add Member",
 
 	},
 };

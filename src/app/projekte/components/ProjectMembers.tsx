@@ -495,7 +495,7 @@ export default function ProjectMembers({ projekt, user, onMembersChange }: Proje
                   fontSize: '0.9rem'
                 }}
               >
-                {addingMember ? '...' : 'Hinzufügen'}
+                {addingMember ? '...' : copy.addMemberButtonLabel}
               </button>
             </div>
             {error && (

@@ -196,7 +196,7 @@ export default function ProjectInfoCard({ projekt, canEdit = false, onNameUpdate
       
       <div style={{ marginTop: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>Beschreibung:</h3>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>{copy.descriptionLabel}</h3>
           {canEdit && (
             <button
               onClick={() => setOpenDesc({ ...openDesc, [projekt.id]: !openDesc[projekt.id] })}

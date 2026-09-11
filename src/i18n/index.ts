@@ -298,7 +298,7 @@ export type NewProjectFormCopy = {
 	workingMethodLabel: string;
 };
 export type ProjectInfoCardCopy = {
-
+	descriptionLabel: string;
 	enterNameUserAlert: string;
 	nameSaveConsoleError: string;
 	descriptionSaveConsoleError: string;
@@ -317,6 +317,7 @@ export type ProjectInfoCardCopy = {
 
 };
 export type ProjectMembersCopy = {
+	addMemberButtonLabel: string;
 	rpcFunctionConsoleError: string;
 	viewFallbackConsoleWarning: string;
 	viewFallbackConsoleError: string;

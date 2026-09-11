@@ -47,7 +47,7 @@ export default function ProjektePage() {
     if (!user) return;
     setLoading(true);
     Promise.all([
-      // Eigene Projekte
+      // eigene Projekte
       supabase
         .from("projekte")
         .select("id, name, beschreibung, created_at, updated_at, user_id, optionen, arbeitsweise")
